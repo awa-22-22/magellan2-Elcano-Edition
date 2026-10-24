@@ -6,11 +6,11 @@
 
   <groupId>magellan</groupId>
   <artifactId>magellan2</artifactId>
-  <version>2.1.2</version>
+  <version>2.1.2-EE.0</version>
   <packaging>jar</packaging>
 
-  <name>Magellan 2</name>
-  <description>Magellan is a client for the Eressea play-by-email game.</description>
+  <name>Magellan Elcano Edition (EE)</name>
+  <description>Magellan Elcano Edition (EE), a fork of Magellan 2: a client for the Eressea play-by-email game.</description>
   <url>https://magellan2.github.io</url>
 
   <properties>

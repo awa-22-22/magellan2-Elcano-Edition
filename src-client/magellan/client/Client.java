@@ -2446,7 +2446,7 @@ public class Client extends JFrame implements ShortcutListener, PreferencesFacto
     public String createTitle(GameData data, boolean showStatusOverride, boolean longTitle) {
       // set frame title (date)
       StringBuilder title1 = new StringBuilder(reportState.isStateChanged() ? "*" : "").append(
-          "Magellan");
+          "Magellan EE");
       StringBuilder title2 = new StringBuilder();
       StringBuilder title3 = new StringBuilder();
 

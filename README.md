@@ -1,4 +1,10 @@
-# Welcome to Magellan!
+# Welcome to Magellan Elcano Edition (EE)!
+
+**Magellan Elcano Edition (EE)** is a fork of [Magellan 2](https://github.com/magellan2/magellan2), the client tool for the play-by-e-mail game Eressea. This edition continues its development with fixes, a Maven-based build and new features. It is a modified version and **not an official Magellan release**. Magellan EE stays under the GNU GPL v2 (see [License(s)](#licenses)), and all original copyright notices are kept. Internally the Java packages (`magellan.*`) and the Maven artifact (`magellan2`) keep their names to make merging upstream changes easy.
+
+Version numbers look like `2.1.2-EE.0`: the upstream base version (`2.1.2`) followed by the EE revision.
+
+## About
 
 Magellan is a full-featured client tool for the play-by-e-mail game Eressea. It displays a map of your part of the Eressea world, supports you in writing orders, performs many complex calculations for you and is available completely in English.
 

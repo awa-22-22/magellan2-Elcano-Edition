@@ -20,8 +20,8 @@ mvn package
 This compiles all sources, runs the unit tests, and creates both
 
 ```
-target/magellan2-2.1.2.jar          # the fat jar alone
-target/magellan2-2.1.2-dist.zip     # a runnable distribution (see below)
+target/magellan2-2.1.2-EE.0.jar          # the fat jar alone
+target/magellan2-2.1.2-EE.0-dist.zip     # a runnable distribution (see below)
 ```
 
 To skip the tests for a quick build:
@@ -36,7 +36,7 @@ Magellan reads its configuration and data files (`etc/`) from the
 working directory at runtime — only the classpath and the help (see below)
 are bundled into the jar.
 The jar alone is therefore **not standalone**: running
-`java -jar target/magellan2-2.1.2.jar` only works if an `etc/` directory
+`java -jar target/magellan2-2.1.2-EE.0.jar` only works if an `etc/` directory
 happens to be reachable from the current directory (e.g. the project root,
 since `Resources.initialize` also checks one directory up), and otherwise
 fails with `RuntimeException: Could NOT find location Magellan`.
@@ -45,9 +45,9 @@ For a copy that works from anywhere, unpack the distribution zip and run the
 jar from inside it (or use the provided start script):
 
 ```bash
-unzip target/magellan2-2.1.2-dist.zip -d /somewhere
-cd /somewhere/magellan2-2.1.2
-./magellan.sh          # or magellan.bat on Windows, or: java -jar magellan2-2.1.2.jar
+unzip target/magellan2-2.1.2-EE.0-dist.zip -d /somewhere
+cd /somewhere/magellan2-2.1.2-EE.0
+./magellan.sh          # or magellan.bat on Windows, or: java -jar magellan2-2.1.2-EE.0.jar
 ```
 
 Alternatively, point the jar at the project root explicitly with `-d`
@@ -55,7 +55,7 @@ Alternatively, point the jar at the project root explicitly with `-d`
 ignored):
 
 ```bash
-java -jar target/magellan2-2.1.2.jar -d /path/to/magellan2
+java -jar target/magellan2-2.1.2-EE.0.jar -d /path/to/magellan2
 ```
 
 ## How the build works
@@ -134,7 +134,7 @@ migrated.
 | `run_tests` | `mvn test` (Surefire; `E3CommandParserTest` excluded as well) |
 | `build_library_jar`, `build_client_jar`, `build_plugins_jar` | `mvn package` — single fat jar instead of `magellan-library/client/plugins.jar` plus the `lib/` folder |
 | `clear-all` | `mvn clean` (cleans only `target/`) |
-| `copy_release_data` (partially), `zip_release` | `maven-assembly-plugin` with `src/assembly/dist.xml` — produces `target/magellan2-2.1.2-dist.zip` (fat jar, `etc/`, `doc/`, readme files, start scripts). Missing vs. Ant: `lib/` (not needed, contents are inside the fat jar) and the templated `etc/VERSION` |
+| `copy_release_data` (partially), `zip_release` | `maven-assembly-plugin` with `src/assembly/dist.xml` — produces `target/magellan2-2.1.2-EE.0-dist.zip` (fat jar, `etc/`, `doc/`, readme files, start scripts). Missing vs. Ant: `lib/` (not needed, contents are inside the fat jar) and the templated `etc/VERSION` |
 | `build_help`, `index_help` | `maven-antrun-plugin` execution `index-help` (runs the `Indexer` on a copy in `target/help`); the result is merged into the fat jar instead of a separate `magellan-help.jar` |
 
 ### Remaining gaps (TODO, needed to retire Ant)
@@ -160,7 +160,7 @@ Magellan is a standalone end-user application, not a library other Maven project
   project would have to be split into Maven modules (`library`, `client`,
   `plugins`) — a much bigger refactoring.
 - **Version handling**: Ant composes the version from `VERSION.MAJOR/MINOR/SUB`
-  plus the build number at build time; the pom fixes it at `2.1.2`.
+  plus the build number at build time; the pom fixes it at `2.1.2-EE.0`.
 - **Test execution**: Ant runs `AFirstTest` separately before all other
   tests; Maven runs everything in one Surefire pass (`AFirstTest` only prints
   the working directory, so the ordering is irrelevant).
