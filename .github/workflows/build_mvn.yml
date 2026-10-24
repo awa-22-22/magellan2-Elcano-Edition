@@ -3,7 +3,7 @@ name: "Run tests and build with Maven on the maven-build branch"
 on:
   push:
     branches:
-    - "maven-build"
+    - "elcano"
 
 jobs:
   build:
