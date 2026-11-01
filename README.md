@@ -38,6 +38,21 @@ Magellan reads its configuration and data files from the working directory at ru
 
 See [mavenbuild.md](mavenbuild.md) for other ways to run the jar, such as pointing it at the project root explicitly with `-d`.
 
+## Settings and running next to Magellan 2
+
+Magellan EE keeps its settings (`magellan.ini`, profiles, logs) in its own folder, so it can be installed and used next to the original Magellan 2 without the two programs sharing or overwriting each other's settings:
+
+| System | Magellan EE | Magellan 2 |
+|---|---|---|
+| Windows | `%APPDATA%\Magellan-EE` | `%APPDATA%\Magellan` |
+| macOS | `~/Library/Application Support/Magellan-EE` | `~/Library/Application Support/Magellan` |
+| Linux | `~/.local/share/Magellan-EE` (or `$XDG_DATA_HOME/Magellan-EE`) | `~/.local/share/Magellan` or `~/.magellan` |
+| fallback | `~/.magellan-ee` | `~/.magellan` |
+
+Magellan EE never reads, moves or changes the settings of Magellan 2. (The original moves `~/.magellan` to `~/.local/share/Magellan` on Linux; this migration was removed.) With `-s <folder>` on the command line you can choose any other settings folder (`-d` sets the folder with the program data, `etc/`).
+
+To take your profiles over from Magellan 2, close Magellan 2 first, then open the profile dialog and start the profile search. Use "Select search folder" and pick the settings folder of Magellan 2 from the table above (searching the whole "User data folder" also finds it, but takes longer). Select the profiles you want and click "Import selected". The import copies the profiles into the folder of Magellan EE; nothing is moved or changed in Magellan 2. If a profile name already exists, the imported one gets a number appended, so existing profiles are not overwritten. (The button "Program data folder" only searches the folder of Magellan EE itself.)
+
 ## Versions
 
 The version is set in one place: `<revision>` in `pom.xml`. It is written into the jar at build time, so the program (title bar, About dialog) always shows the version it was built from.

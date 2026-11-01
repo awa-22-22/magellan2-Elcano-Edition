@@ -32,9 +32,28 @@ public class MagellanFinder {
   private static final Logger log = Logger.getInstance(MagellanFinder.class);
 
   /**
-   * Tries to create/read the settings file in <code>settDir</code> (first), the user's home
-   * directory (second), <code>magDirectory</code> (third) or the current directory (last). The
-   * first valid location is returned.
+   * Name of the settings directory below the platform's application data directory (e.g.
+   * <code>%APPDATA%\Magellan-EE</code>). It deliberately differs from the one of the original Magellan 2
+   * ("Magellan"), so both programs can be installed side by side without sharing or overwriting each other's
+   * settings.
+   */
+  private static final String APPDATA_DIR_NAME = "Magellan-EE";
+
+  /**
+   * Name of the hidden settings directory in the user's home directory, used if there is no application data directory
+   * (the original Magellan 2 uses ".magellan").
+   */
+  private static final String HOME_DIR_NAME = ".magellan-ee";
+
+  /**
+   * Tries to create/read the settings file in <code>settDir</code> (first), the application data
+   * directory (second, see {@link #getAppDataDirectory()}), <code>magDirectory</code> (third) or the
+   * current directory (last). The first valid location is returned.
+   * <p>
+   * Unlike the original Magellan 2, the user's home directory itself is not searched, because
+   * that is where Magellan 2 may keep its <code>magellan.ini</code>; this program must never pick up or modify
+   * the settings of Magellan 2.
+   * </p>
    *
    * @param magDirectory The magellan resource directory
    * @param settDir <code>null</code> or the magellan settings directory
@@ -53,8 +72,7 @@ public class MagellanFinder {
       }
     }
     File[] candidates =
-        new File[] { getAppDataDirectory(), new File(System.getProperty("user.home")),
-            magDirectory, new File(".") };
+        new File[] { getAppDataDirectory(), magDirectory, new File(".") };
     File settFileDir = null;
     for (File dir : candidates) {
       if (dir != null && hasSettings(dir)) {
@@ -82,6 +100,11 @@ public class MagellanFinder {
     return settFileDir;
   }
 
+  /**
+   * Returns the directory for the settings of this program in the platform's application data directory. The name
+   * differs from the one used by the original Magellan 2, see {@link #APPDATA_DIR_NAME}. In particular, the settings of
+   * Magellan 2 are never moved or copied; profiles can be imported explicitly in the profile search dialog.
+   */
   public static File getAppDataDirectory() {
     String os = System.getProperty("os.name");
     if (os != null) {
@@ -100,36 +123,17 @@ public class MagellanFinder {
             dir = config.getAbsolutePath();
           }
         }
-        String olddir = System.getProperty("user.home");
-        File oldConfig = new File(olddir, ".magellan");
-        File newConfig = new File(dir, "Magellan");
-        if (oldConfig.isDirectory()) {
-          if (newConfig.exists()) {
-            MagellanFinder.log.warn("found possible old configuration in " + oldConfig.getAbsolutePath() + " but "
-                + newConfig
-                + " also exists. Using the latter.");
-          } else {
-            MagellanFinder.log.info("trying to move magellan configuration from " + oldConfig.getAbsolutePath()
-                + " to "
-                + newConfig.getAbsolutePath());
-            if (!oldConfig.renameTo(newConfig)) {
-              MagellanFinder.log.error("could not copy configuration from " + oldConfig.getAbsolutePath() + " to "
-                  + newConfig.getAbsolutePath());
-            }
-          }
-        }
-
       } else {
         dir = System.getProperty("user.home");
       }
       if (dir != null && new File(dir).exists())
         if (os.contains("WIN") || os.contains("MAC") || (os.contains("LINUX") && !dir.equals(System.getProperty(
             "user.home"))))
-          return new File(dir, "Magellan");
+          return new File(dir, APPDATA_DIR_NAME);
         else
-          return new File(dir, ".magellan");
+          return new File(dir, HOME_DIR_NAME);
     }
-    return new File(System.getProperty("user.home"), ".magellan2");
+    return new File(System.getProperty("user.home"), HOME_DIR_NAME);
   }
 
   private static boolean hasOrCreateSettings(File dir) {
