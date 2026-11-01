@@ -4,16 +4,42 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>magellan</groupId>
-  <artifactId>magellan2</artifactId>
-  <version>2.1.2-EE.0</version>
+  <groupId>de.magellan2.elcano</groupId>
+  <artifactId>magellan-ee</artifactId>
+  <version>${revision}${changelist}</version>
   <packaging>jar</packaging>
 
   <name>Magellan Elcano Edition (EE)</name>
-  <description>Magellan Elcano Edition (EE), a fork of Magellan 2: a client for the Eressea play-by-email game.</description>
-  <url>https://magellan2.github.io</url>
+  <description>Magellan Elcano Edition (EE), a client for the Eressea play-by-email game, derived from Magellan 2.</description>
+  <url>https://github.com/awa-22-22/magellan2-Elcano-Edition</url>
+
+  <licenses>
+    <license>
+      <name>GNU General Public License, version 2</name>
+      <url>https://www.gnu.org/licenses/old-licenses/gpl-2.0.html</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+
+  <scm>
+    <url>https://github.com/awa-22-22/magellan2-Elcano-Edition</url>
+    <connection>scm:git:https://github.com/awa-22-22/magellan2-Elcano-Edition.git</connection>
+  </scm>
+
+  <issueManagement>
+    <system>GitHub Issues</system>
+    <url>https://github.com/awa-22-22/magellan2-Elcano-Edition/issues</url>
+  </issueManagement>
 
   <properties>
+    <!--
+      CI-friendly version: ${revision}${changelist}. Local builds are
+      "<revision>-SNAPSHOT". The test-build workflow appends the push time
+      (-Dchangelist=-SNAPSHOT.yyyymmdd-hhmm); a release build passes an
+      empty -Dchangelist=.
+    -->
+    <revision>1.0.0</revision>
+    <changelist>-SNAPSHOT</changelist>
     <!-- same settings as build.xml -->
     <maven.compiler.release>11</maven.compiler.release>
     <project.build.sourceEncoding>ISO-8859-1</project.build.sourceEncoding>
@@ -212,6 +238,17 @@
   </dependencies>
 
   <build>
+    <resources>
+      <!--
+        Only magellan-version.properties is taken from src/main/resources and
+        filtered (${project.version}); it ends up in the jar so that the program
+        knows its own version, see magellan.library.utils.VersionInfo.
+      -->
+      <resource>
+        <directory>src/main/resources</directory>
+        <filtering>true</filtering>
+      </resource>
+    </resources>
     <plugins>
       <!-- register the Eclipse source folders -->
       <plugin>
@@ -319,6 +356,26 @@
                 </macrodef>
                 <index-help lang="de" />
                 <index-help lang="en" />
+              </target>
+            </configuration>
+          </execution>
+          <execution>
+            <!-- etc/VERSION is read at runtime (title, About dialog, update check) -->
+            <id>generate-version-file</id>
+            <phase>prepare-package</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <target>
+                <copy file="${project.basedir}/etc/VERSION.template"
+                      tofile="${project.build.directory}/generated/etc/VERSION"
+                      overwrite="true">
+                  <filterset>
+                    <filter token="VERSION" value="${project.version}" />
+                    <filter token="SEMANTIC_VERSION" value="${project.version}" />
+                  </filterset>
+                </copy>
               </target>
             </configuration>
           </execution>

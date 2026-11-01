@@ -1,83 +1,60 @@
-# Welcome to Magellan Elcano Edition (EE)!
+# Magellan Elcano Edition (EE)
 
-**Magellan Elcano Edition (EE)** is a fork of [Magellan 2](https://github.com/magellan2/magellan2), the client tool for the play-by-e-mail game Eressea. This edition continues its development with fixes, a Maven-based build and new features. It is a modified version and **not an official Magellan release**. Magellan EE stays under the GNU GPL v2 (see [License(s)](#licenses)), and all original copyright notices are kept. Internally the Java packages (`magellan.*`) and the Maven artifact (`magellan2`) keep their names to make merging upstream changes easy.
+**Magellan Elcano Edition (EE)** is a client tool for the play-by-e-mail game [Eressea](https://www.eressea.de/). It displays a map of your part of the Eressea world, supports you in writing orders and performs many complex calculations for you.
 
-Version numbers look like `2.1.2-EE.0`: the upstream base version (`2.1.2`) followed by the EE revision.
+It is a hard fork of [Magellan 2](https://github.com/magellan2/magellan2). Magellan EE continues on its own: it has its own version numbers, its own releases and its own issue tracker, and it does not follow the original project any more. It is **not an official Magellan release**, and the original developers are not responsible for it.
 
-## About
+Magellan EE is only one among many client programs for Eressea and is in no way related to the developers of Eressea.
 
-Magellan is a full-featured client tool for the play-by-e-mail game Eressea. It displays a map of your part of the Eressea world, supports you in writing orders, performs many complex calculations for you and is available completely in English.
+## Support
 
-Magellan is only one among many other client programs for Eressea and is in no way related to the developers of Eressea. To relieve them of unnecessary work please contact the Magellan Community in case you have any questions or problems.
+Please report problems and ideas for Magellan EE in the [issue tracker](https://github.com/awa-22-22/magellan2-Elcano-Edition/issues) of this repository, not to the original Magellan project.
 
-## How To Compile
+The program does not contact any server on its own. In particular, there is no check for newer versions; new versions are published under [Releases](https://github.com/awa-22-22/magellan2-Elcano-Edition/releases).
 
-Actually the Magellan Client is very old. It was originally designed to run with Java 6. Then we switched to Java 8 and Java 11. Then the development was more or less closed, because most really necessary features are implemented and everybody could manage also big Eressea CR reports. In the last years, we made only very limited changes for some new in game features.
+## How To Build
 
-With (f.e.) Eclipse IDE it is very easy to import this repository as a project. Also running the project with newer JDKs is not an issue. It works out of the box
+You need JDK 11 or newer and Maven 3.6+ (see https://maven.apache.org/). On the first build, internet access to Maven Central is required for the build plugins and the test dependencies.
 
-- checkout the sources from https://github.com/magellan2/magellan2
-- in Eclipse or your prefered Java IDE open the project from file system..
-- maybe add your current JRE system library to the Eclipse project. 
-
-I've tested with Eclipse Temurin JDK 17.0.1 and OpenJDK 23.0.3. and both where compiling the sources and could run the Magellan Client `src-client/magellan.client.Client`.
-
-We are now building the project with Apache Maven and Java 11+. To install Maven follow the instructions on https://maven.apache.org/. You need JDK 11 or newer and Maven 3.6+; on the first build, internet access to Maven Central is required for the build plugins and test dependencies.
-
-Then open a terminal and run the following command to compile the sources, run the unit tests and package everything into a single executable fat jar plus a runnable distribution zip:
+Check out this repository, open a terminal in its root directory and run:
 
     mvn package
 
-To skip the tests for a quick build:
+This compiles the sources, runs the unit tests and packages everything into a single executable fat jar plus a runnable distribution zip. To skip the tests for a quick build:
 
     mvn package -DskipTests
 
-See [mavenbuild.md](mavenbuild.md) for details on how the Maven build works, what it produces (`target/magellan2-<version>.jar` and `target/magellan2-<version>-dist.zip`) and how it relates to the classic Ant build.
+See [mavenbuild.md](mavenbuild.md) for details on how the build works, what it produces (`target/magellan-ee-<version>.jar` and `target/magellan-ee-<version>-dist.zip`) and which parts of the old Ant build (`build.xml`) it replaces. The Ant build is a leftover of the original project; it is not maintained and may be removed.
 
-We are moving away from Apache Ant (`build.xml`) in favor of Maven. Native installers (IzPack / Install4J), Javadoc and a source jar were part of the Ant build but are not goals of the Maven build: Magellan is a standalone end-user application with no downstream Maven consumers, so there is no one to attach sources/Javadoc, and the distribution zip already covers how people get and run the app. See [mavenbuild.md](mavenbuild.md) for the remaining gaps that still need to be closed before Ant can be retired entirely.
+The project can also be imported as a Maven project into an IDE (Eclipse, IntelliJ, VS Code). The main class is `magellan.client.Client`. Native installers (IzPack / Install4J), Javadoc and a source jar are not part of the Maven build.
 
 ## How To Run
 
-When using the source code here in this repository and compiled the client with `mvn package`, unpack the distribution zip and run the jar from inside it (or use the provided start script), since Magellan reads its configuration and data files from the working directory at runtime:
+Magellan reads its configuration and data files from the working directory at runtime, so unpack the distribution zip and run the jar from inside it (or use the provided start script):
 
-    unzip target/magellan2-<version>-dist.zip -d /somewhere
-    cd /somewhere/magellan2-<version>
-    ./magellan.sh          # or magellan.bat on Windows, or: java -jar magellan2-<version>.jar
+    unzip target/magellan-ee-<version>-dist.zip -d /somewhere
+    cd /somewhere/magellan-ee-<version>
+    ./magellan.sh          # or magellan.bat on Windows, or: java -jar magellan-ee-<version>.jar
 
 See [mavenbuild.md](mavenbuild.md) for other ways to run the jar, such as pointing it at the project root explicitly with `-d`.
 
-## How To Release
+## Versions
 
-We are currently in a process of switching from Izpack to Install4j to allow native installer for Windows, Linux and MacOS even when our Magallan client as a Java program can run on any platform that supports Java11. The process of new creating a new release is currently a bit difficulty.
+The version is set in one place: `<revision>` in `pom.xml`. It is written into the jar at build time, so the program (title bar, About dialog) always shows the version it was built from.
 
-- we protect the default branch, so it's not possible to commit anything to it without a merge request. When you develop a new feature or a fix a bug, you should create at least one new branch (like `develop`). Every changes must be done there. We have created a Github action that runs on your branch to test, if the application can be compiled.
-- then you need to manually update `build.xml` and update the properties `VERSION.MAJOR`, `VERSION.MINOR` and `VERSION.SUB` as the Semantic versioning says. `VERSION.SUB` should increase for any bugfix release, `VERSION.MINOR` should be increased for any feature release and `VERSION.MAJOR` should be increased on major changes.
-- we have also a build number in the hidden file `.build.number`, that increases during the build process once, but the build process pipeline doesnt commit it back to the branch, so please also increase it manually and commit it
-- validate, if also the installer/izpack-install.template.xml is up2date with the new version number etc.
-- please also update `RELASENOTES.txt` and `CHANGELOG.txt` to document your changes
-- commit and push everything into your branch
-- create a pull request
-- when the PR is approved, the build pipeline should run again and should create a `stable` release, see `.github/workflow/publish.yml`. It contains installer for Java, Windows, Unix, MacOS. It also updates the home page and informs users about a new release.
+- Local builds and the builds of the CI workflow are test versions: `<revision>-SNAPSHOT`, and in CI additionally the UTC time of the push, e.g. `1.0.0-SNAPSHOT.20261024-1530`.
+- A release version has no suffix (`mvn package -Dchangelist=`).
 
-## How to Distribute
+## Contributing
 
-Please feel free to distribute your ideas. Just create a Pull-Request like described above. Update `build.xml`, `.build.number`, `CHANGELOG.txt` and `RELEASENOTES.txt`. 
+Pull requests are welcome. Please keep changes focused, make sure `mvn package` passes, and describe user-visible changes in `CHANGELOG.txt` and `RELEASENOTES.txt`.
 
-## Other links
+## Origin and License(s)
 
-- most devs are using Eressea to "validate" the client. See https://www.eressea.de/
-- we use Install4J now to create installers for Windows, Linux and MacOS. See https://www.ej-technologies.com/install4j
+Magellan EE is derived from Magellan 2 and is a modified version of it. All original copyright and license notices are kept; the credits of the original authors are shown in the About dialog.
 
-## License(s)
+Unless otherwise indicated, all files in this distribution are provided to you under the terms and conditions of the GNU GPL License Version 2.0. A copy of this license is provided in COPYING.txt. Modifications made in Magellan EE are provided under the same license.
 
-Unless otherwise indicated, all files in this distribution are
-provided to you under the terms and conditions of the GNU GPL
-License Version 2.0. A copy of this license is provided in
-COPYING.
+Exceptions from the GNU GPL are notified in the source files itself or written down in a separate file (e.g. `src/release/lib/jflap.LICENSE.txt`).
 
-Exceptions from the GNU GPL  are notified in the source files
-itself or written down in a seperate file (e.g. 
-src/release/lib/jflap.LICENSE.txt).
-
-If you are not satisfied that EVERYTHING is under the GNU GPL 
-License you should not use Magellan.
+If you are not satisfied that EVERYTHING is under the GNU GPL License you should not use Magellan.

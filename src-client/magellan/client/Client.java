@@ -140,7 +140,6 @@ import magellan.client.extern.MagellanPlugInLoader;
 import magellan.client.extern.MainMenuProvider;
 import magellan.client.preferences.ClientPreferences;
 import magellan.client.preferences.DetailsViewAutoCompletionPreferences;
-import magellan.client.preferences.Install4J;
 import magellan.client.swing.AskForPasswordDialog;
 import magellan.client.swing.DebugDock;
 import magellan.client.swing.DialogProvider;
@@ -201,7 +200,6 @@ import magellan.library.tasks.Problem;
 import magellan.library.utils.Locales;
 import magellan.library.utils.Log;
 import magellan.library.utils.MagellanImages;
-import magellan.library.utils.MagellanUrl;
 import magellan.library.utils.MarkovNameGenerator;
 import magellan.library.utils.MemoryManagment;
 import magellan.library.utils.NameGenerator;
@@ -212,7 +210,6 @@ import magellan.library.utils.Resources;
 import magellan.library.utils.SelfCleaningProperties;
 import magellan.library.utils.TrustLevels;
 import magellan.library.utils.UserInterface;
-import magellan.library.utils.Utils;
 import magellan.library.utils.VersionInfo;
 import magellan.library.utils.logging.Logger;
 import magellan.library.utils.transformation.BoxTransformer;
@@ -1320,44 +1317,6 @@ public class Client extends JFrame implements ShortcutListener, PreferencesFacto
     return item;
   }
 
-  private static class MessageWithLink extends JEditorPane {
-    private static final long serialVersionUID = 1L;
-
-    public MessageWithLink(String htmlBody) {
-      super("text/html", "<html><body style=\"" + getStyle() + "\">" + htmlBody + "</body></html>");
-      addHyperlinkListener(new HyperlinkListener() {
-        @Override
-        public void hyperlinkUpdate(HyperlinkEvent e) {
-          if (e.getEventType().equals(HyperlinkEvent.EventType.ACTIVATED)) {
-            try {
-              if (e.getURL() != null) {
-                Macifier.browse(e.getURL().toURI());
-              }
-            } catch (Exception ex) {
-              log.warn(ex);
-            }
-          }
-        }
-      });
-      setEditable(false);
-      setBorder(null);
-    }
-
-    static StringBuffer getStyle() {
-      // for copying style
-      JLabel label = new JLabel();
-      Font font = label.getFont();
-      Color color = label.getBackground();
-
-      // create some css from the label's font
-      StringBuffer style = new StringBuffer("font-family:" + font.getFamily() + ";");
-      style.append("font-weight:" + (font.isBold() ? "bold" : "normal") + ";");
-      style.append("font-size:" + font.getSize() + "pt;");
-      style.append("background-color: rgb(" + color.getRed() + "," + color.getGreen() + "," + color.getBlue() + ");");
-      return style;
-    }
-  }
-
   /**
    * START &amp; END Code
    */
@@ -1505,45 +1464,7 @@ public class Client extends JFrame implements ShortcutListener, PreferencesFacto
 
   private static void versionCheck(Client c, File tBinDir, File tResourceDir, File tConfigDir) {
     try {
-      boolean checkVersion = false;
-
-      Install4J i4 = new Install4J(tBinDir, tConfigDir);
-
-      if (i4.isActive()) {
-        checkVersion = false;
-        if (i4.isSetByInstaller()) {
-          String schedule = i4.getUpdateSchedule();
-          if (schedule != null) {
-            boolean check = !schedule.equals(Install4J.CHECK_NEVER);
-            log.fine("updated version check at start to " + check);
-            PropertiesHelper.setBoolean(c.getProperties(), VersionInfo.PROPERTY_KEY_UPDATECHECK_CHECK, check);
-          }
-        }
-      } else {
-        log.info("Install4J configuration not found");
-      }
-
       String currentVersion = VersionInfo.getVersion(tResourceDir);
-      if (checkVersion) {
-        String newestVersion = VersionInfo.getNewestVersion(c.getProperties(), checkVersion ? null
-            : Client.startWindow);
-        if (!Utils.isEmpty(newestVersion)) {
-          Client.log.info("Newest Version on server: " + newestVersion);
-          Client.log.info("Current Version: " + currentVersion);
-          if (VersionInfo.isNewer(newestVersion, currentVersion)) {
-            String url = MagellanUrl.getMagellanUrl(MagellanUrl.WWW_DOWNLOAD + "." + Locales
-                .getGUILocale().getLanguage());
-            if (url == null) {
-              url = MagellanUrl.getMagellanUrl(MagellanUrl.WWW_DOWNLOAD);
-            }
-
-            JOptionPane.showMessageDialog(Client.startWindow,
-                new MessageWithLink(Resources.get("client.new_version", new Object[] { newestVersion, url })),
-                "",
-                JOptionPane.INFORMATION_MESSAGE);
-          }
-        }
-      }
 
       String lastVersion = c.getProperties().getProperty("Client.LastVersion");
       if (lastVersion == null || !lastVersion.equals(currentVersion)) {

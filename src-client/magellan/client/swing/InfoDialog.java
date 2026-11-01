@@ -81,7 +81,7 @@ public class InfoDialog extends InternationalizedDialog implements HyperlinkList
     jPanel.add(filler);
     String text =
         Resources.get("infodlg.infotext", getVersionString(), MagellanUrl.getRootUrl(), MagellanUrl
-            .getMagellanUrl("www.fernando"), MagellanUrl.getMagellanUrl(MagellanUrl.WWW_BUGS),
+            .getMagellanUrl(MagellanUrl.WWW_FERNANDO), MagellanUrl.getMagellanUrl(MagellanUrl.WWW_BUGS),
             Client.getLogFile().toURI().toASCIIString(), Client.getLogFile().getName(), new File(Client
                 .getResourceDirectory(), "doc/license").toURI().toASCIIString());
 

@@ -28,26 +28,19 @@ import java.util.Properties;
 import magellan.library.utils.logging.Logger;
 
 /**
- * Utility class maintaining important URLs for Magellan.
+ * Utility class maintaining important URLs for Magellan Elcano Edition.
+ * <p>
+ * The URLs are fixed; unlike in the original Magellan there is no remote file with locations that is fetched at
+ * runtime, so the program does not contact any server on its own.
+ * </p>
  *
  * @author stm
  */
 public class MagellanUrl {
   private static final Logger log = Logger.getInstance(MagellanUrl.class);
 
-  /**
-   * This URL should point to a file containing all other URLs (in properties file format: <br />
-   * <code>
-   * key1 = value1<br />
-   * key2 = value2<br />
-   * # ....
-   * </code>
-   */
-  public static final String MAGELLAN_LOCATIONS_URL =
-      "https://magellan2.github.io/api/locations";
-
-  /** Time to wait between connection attempts. */
-  private static final long HTTP_TIMEOUT = 3600000;
+  /** Project repository, the base of the other URLs. */
+  private static final String REPOSITORY = "https://github.com/awa-22-22/magellan2-Elcano-Edition";
 
   /** Key for basic Magellan URL */
   public static final String WWW_ROOT = "www.root";
@@ -55,95 +48,37 @@ public class MagellanUrl {
   /** Key for Magellan bugtracker URL */
   public static final String WWW_BUGS = "www.bugtracker";
 
-  /** Key for nightly version */
-  public static final String VERSIONS = "api.versions";
-
   /** Key for download URL */
   public static final String WWW_DOWNLOAD = "www.download";
 
   /** Key for files URL */
   public static final String WWW_FILES = "www.files";
 
-  private static long lastAccessed = 0;
+  /** Key for the Wikipedia article about Ferdinand Magellan, shown in the About dialog. */
+  public static final String WWW_FERNANDO = "www.fernando";
 
-  private static Properties bundle, defaultBundle;
+  private static final Properties urls = new Properties();
 
   static {
-    initResourceBundle();
-  }
-
-  private static void initResourceBundle() {
-    defaultBundle = new Properties();
-
-    for (String[] keyVal : new String[][] { { WWW_ROOT, "https://magellan2.github.io" },
-        { WWW_BUGS, "https://magellan2.github.io/bugs" },
-        { WWW_DOWNLOAD, "https://magellan2.github.io/de/download/" },
-        { "www.download.de", "https://magellan2.github.io/de/download/" },
-        { "www.download.en", "https://magellan2.github.io/en/download/" },
-        { WWW_FILES, "https://github.com/magellan2/magellan2/releases" },
-        { "www.fernando", "https://de.wikipedia.org/wiki/Ferdinand_Magellan" },
-        { VERSIONS, "https://magellan2.github.io/api/versions" } }) {
-      defaultBundle.put(keyVal[0], keyVal[1]);
-    }
-
-    bundle = defaultBundle;
+    urls.put(WWW_ROOT, REPOSITORY);
+    urls.put(WWW_BUGS, REPOSITORY + "/issues");
+    urls.put(WWW_DOWNLOAD, REPOSITORY + "/releases");
+    urls.put(WWW_FILES, REPOSITORY + "/releases");
+    urls.put(WWW_FERNANDO, "https://de.wikipedia.org/wiki/Ferdinand_Magellan");
   }
 
   /**
-   * Returns a URL, if possible fetched from the remote file at {@link #MAGELLAN_LOCATIONS_URL}.
-   * Current url keys include "www.root", "www.bugtracker", "www.download", "version.release",
-   * "version.nightly".
+   * Returns the URL for a key.
    *
-   * @param key
-   * @return The url for the key, <code>null</code> if it could not be found and isn't one of the
-   *         default values.
+   * @param key One of the <code>WWW_*</code> keys.
+   * @return The url for the key, <code>null</code> if there is none.
    */
   public static String getMagellanUrl(String key) {
-    if (lastAccessed == 0) {
-      log.warn("URLs not initialized");
+    String url = urls.getProperty(key);
+    if (url == null) {
+      log.warn("Could not find Magellan URL " + key);
     }
-    String url = bundle.getProperty(key);
-    if (url != null)
-      return url;
-
-    log.warn("Could not find Magellan URL " + key);
-    return defaultBundle.getProperty(key);
-  }
-
-  /**
-   * Tries to access the locations file remotely and read the values.
-   *
-   * @param properties Client settings, see {@link HTTPClient#HTTPClient(Properties)}
-   * @see HTTPClient
-   */
-  public static void retrieveLocations(Properties properties) {
-    retrieveLocations(properties, false);
-  }
-
-  /**
-   * Tries to access the locations file remotely and read the values.
-   *
-   * @param properties Client settings, see {@link HTTPClient#HTTPClient(Properties)}
-   * @param force If this is <code>true</code>, the timeout is ignored.
-   * @see HTTPClient
-   */
-  public static void retrieveLocations(Properties properties, boolean force) {
-    if (force || System.currentTimeMillis() - lastAccessed > HTTP_TIMEOUT) {
-      lastAccessed = System.currentTimeMillis();
-      try {
-        HTTPClient client = new HTTPClient(properties);
-        HTTPResult result = client.get(MAGELLAN_LOCATIONS_URL);
-        if (result != null && result.getStatus() == 200) {
-          bundle = JsonAdapter.parsePropertiesMap(result.getResult());
-        }
-        if (client.isConnectionFailed()) {
-          log.info("could not connect to magellan locations " + MAGELLAN_LOCATIONS_URL);
-        }
-      } catch (Exception exception) {
-        log.info("", exception);
-        initResourceBundle();
-      }
-    }
+    return url;
   }
 
   /**

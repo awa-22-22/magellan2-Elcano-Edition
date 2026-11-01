@@ -17,7 +17,7 @@
     <format>zip</format>
   </formats>
   <includeBaseDirectory>true</includeBaseDirectory>
-  <baseDirectory>magellan2-${project.version}</baseDirectory>
+  <baseDirectory>magellan-ee-${project.version}</baseDirectory>
 
   <files>
     <!-- the fat jar built by the antrun execution earlier in the package phase -->
@@ -25,6 +25,12 @@
       <source>${project.build.directory}/${project.build.finalName}.jar</source>
       <outputDirectory>/</outputDirectory>
       <destName>${project.build.finalName}.jar</destName>
+    </file>
+    <!-- etc/VERSION generated from etc/VERSION.template by the antrun execution generate-version-file -->
+    <file>
+      <source>${project.build.directory}/generated/etc/VERSION</source>
+      <outputDirectory>etc</outputDirectory>
+      <destName>VERSION</destName>
     </file>
     <!-- external plugins folder marker, as created by copy_release_data -->
     <file>

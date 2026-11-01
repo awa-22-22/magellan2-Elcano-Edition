@@ -1,4 +1,4 @@
-name: "Run tests and build with Maven on the maven-build branch"
+name: "Run tests and build a test version with Maven on the elcano branch"
 
 on:
   push:
@@ -24,11 +24,12 @@ jobs:
         java-version: 11
 
     - name: "Build binaries with mvn"
-      run: mvn package
+      # test version: <revision>-SNAPSHOT.<UTC push time>, e.g. 2.1.2-EE.0-SNAPSHOT.20261024-1530
+      run: mvn -B package -Dchangelist=-SNAPSHOT.$(date -u +%Y%m%d-%H%M)
       
     - name: "Upload artifact"
       uses: actions/upload-artifact@v4
       with:
         name: magellan       # name shown in the Actions UI and the name of the artefact itself + .zip! The artefact is saved in a subpath with run encoded.
-        path: target/magellan*.zip  # file, folder, or glob pattern to upload
+        path: target/magellan-ee-*.zip  # file, folder, or glob pattern to upload
         overwrite: true

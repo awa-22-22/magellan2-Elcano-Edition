@@ -43,7 +43,6 @@ import magellan.library.utils.IDBaseConverter;
 import magellan.library.utils.Locales;
 import magellan.library.utils.PropertiesHelper;
 import magellan.library.utils.Resources;
-import magellan.library.utils.VersionInfo;
 import magellan.library.utils.logging.Logger;
 
 /**
@@ -78,12 +77,9 @@ public class ClientPreferences extends AbstractPreferencesAdapter implements
   private JCheckBox showTempUnitDialog;
   private JCheckBox showProgress;
   private JCheckBox createVoidRegions;
-  private JCheckBox checkForUpdates;
   private JCheckBox loadlastreport;
   protected List<PreferencesAdapter> subAdapters;
   private JComboBox<String> logLevel;
-  private JLabel stableLabel;
-  private JLabel install4JLabel;
   private JTextField xmxLabel;
   private JLabel xmxUnit;
 
@@ -127,7 +123,6 @@ public class ClientPreferences extends AbstractPreferencesAdapter implements
     getLocalesPanel();
     getTempUnitPanel();
     getMiscPanel();
-    getUpdatePanel();
 
   }
 
@@ -222,50 +217,6 @@ public class ClientPreferences extends AbstractPreferencesAdapter implements
       long currentMax = Runtime.getRuntime().maxMemory() / 1024 / 1024;
       panel.add(new JLabel(Resources.get("clientpreferences.xmx.current", currentMax)), c);
     }
-
-    return panel;
-  }
-
-  private Component getUpdatePanel() {
-
-    JPanel panel = addPanel(Resources.get("clientpreferences.update.border"), new GridBagLayout());
-
-    int line = 0;
-    GridBagConstraints c = new GridBagConstraints();
-    c.insets = new Insets(2, 2, 2, 2);
-
-    // check for updates
-    c.gridx = 0;
-    c.gridy = line;
-    c.fill = GridBagConstraints.NONE;
-    c.anchor = GridBagConstraints.WEST;
-    c.weightx = 0.0;
-    c.gridwidth = 3;
-
-    install4JLabel = new JLabel(Resources.get("clientpreferences.update.install4jactive"));
-    panel.add(install4JLabel, c);
-
-    c.gridy = ++line;
-    c.gridwidth = 2;
-
-    checkForUpdates =
-        new JCheckBox(Resources.get("clientpreferences.misc.checkforupdates.caption"));
-    checkForUpdates.setHorizontalAlignment(SwingConstants.LEFT);
-    panel.add(checkForUpdates, c);
-    c.gridx = 2;
-    c.gridy = line;
-    c.fill = GridBagConstraints.NONE;
-    c.anchor = GridBagConstraints.EAST;
-    c.weightx = 0.1;
-    stableLabel = new JLabel("1.2.3");
-    stableLabel.setEnabled(false);
-
-    panel.add(stableLabel, c);
-
-    line++;
-
-    checkForUpdates.setActionCommand(VersionInfo.PROPERTY_KEY_UPDATECHECK_CHECK);
-    checkForUpdates.addActionListener(this);
 
     return panel;
   }
@@ -417,30 +368,11 @@ public class ClientPreferences extends AbstractPreferencesAdapter implements
     // TODO: implement it
 
     initLogLevel();
-    initVersion();
     if (getInstall4J().isActive()) {
       ClientMemory cm = new ClientMemory(Client.getBinaryDirectory(), Client.getSettingsDirectory());
       xmxLabel.setText("" + cm.getXmX());
       xmxUnit.setText(cm.getXmXUnit());
     }
-  }
-
-  private void initVersion() {
-    Install4J i4 = getInstall4J();
-
-    install4JLabel.setVisible(i4.isActive());
-    boolean check = PropertiesHelper.getBoolean(settings, VersionInfo.PROPERTY_KEY_UPDATECHECK_CHECK, true);
-
-    checkForUpdates.setSelected(check);
-
-    Properties sCopy = new Properties(settings);
-    sCopy.setProperty(VersionInfo.PROPERTY_KEY_UPDATECHECK_CHECK, "true");
-    sCopy.setProperty(VersionInfo.PROPERTY_KEY_UPDATECHECK_FAILED, "0");
-    String stableVersion = VersionInfo.getNewestVersion(sCopy, null);
-    String version = settings.getProperty(PropertiesHelper.SEMANTIC_VERSION);
-    stableLabel.setText(version != null && version.equals(stableVersion) ? (version + " = " + stableVersion) : (version
-        + " \u2260 "
-        + stableVersion));
   }
 
   private Install4J getInstall4J() {
@@ -530,15 +462,6 @@ public class ClientPreferences extends AbstractPreferencesAdapter implements
         log.fine("invalid number format '" + xmxLabel.getText() + "'");
       }
     }
-
-    Install4J i4 = getInstall4J();
-    if (i4.isActive()) {
-      i4.setCheckEveryStart(checkForUpdates.isSelected());
-      i4.setNightlyCheck(false);
-      i4.setSetByMagellan();
-    }
-    settings.setProperty(VersionInfo.PROPERTY_KEY_UPDATECHECK_CHECK, String.valueOf(checkForUpdates
-        .isSelected()));
   }
 
   /**

@@ -23,8 +23,11 @@
 //
 package magellan.library.utils;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import org.junit.Assume;
 import org.junit.Test;
 
 import magellan.test.MagellanTestWithResources;
@@ -39,6 +42,21 @@ public class VersionInfoTest extends MagellanTestWithResources {
     assertTrue(VersionInfo.isNewer("2.1.0-123.latest", "2.1.0-100"));
     assertTrue(VersionInfo.isNewer("2.1.0-144", "2.1.0-123.latest"));
     assertTrue(VersionInfo.isNewer("2.1.1", "2.1.0-123.latest"));
+  }
+
+  /**
+   * The Maven build writes the version of the build into a classpath resource, which {@link VersionInfo} must find even
+   * without any <code>etc/VERSION</code> file. Skipped if the tests are not run by Maven (resource missing).
+   */
+  @Test
+  public void testVersionFromClasspathResource() {
+    Assume.assumeNotNull(VersionInfo.class.getResource(VersionInfo.VERSION_RESOURCE));
+
+    String version = VersionInfo.getVersion(null);
+
+    assertNotNull(version);
+    assertFalse("resource was not filtered: " + version, version.contains("${"));
+    assertFalse(new Version(version).isError());
   }
 
 }
