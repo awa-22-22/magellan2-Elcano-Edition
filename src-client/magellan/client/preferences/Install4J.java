@@ -91,6 +91,7 @@ public class Install4J {
   private Properties localProps;
   // private static Install4J instance;
 
+  @Deprecated
   public Install4J(File tBinDir, File tConfigDir) {
     install4jProps = new Properties();
     if (tBinDir != null) {

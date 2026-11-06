@@ -131,6 +131,7 @@ public class ProfileManagerTest {
 
     MagellanTestUtil.allow(settingsDir.resolve("default"));
     ProfileManager.init(settingsDir.toFile());
+    MagellanTestUtil.assumePosix();
     MagellanTestUtil.deny(settingsDir.resolve("default"));
     ProfileManager.checkProfiles();
     assertFalse(ProfileManager.getProfiles().contains("default"));
@@ -171,6 +172,7 @@ public class ProfileManagerTest {
     // access denied
     FileUtils.deleteDirectory(settingsDir.resolve("second"));
     ProfileManager.add("second", "default");
+    MagellanTestUtil.assumePosix();
     MagellanTestUtil.deny(settingsDir.resolve("second"));
     try {
       ProfileManager.remove("second", true);

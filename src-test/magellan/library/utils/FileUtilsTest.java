@@ -119,6 +119,7 @@ public class FileUtilsTest {
 
   @Test
   public void testCopyDirectoryPerm() throws FileException, IOException {
+    MagellanTestUtil.assumePosix();
     MagellanTestUtil.deny(destDir);
     try {
       FileUtils.copyDirectory(srcDir, destDir);
@@ -138,6 +139,7 @@ public class FileUtilsTest {
 
   @Test
   public void testDeleteDirectoryPerm() throws FileException, IOException {
+    MagellanTestUtil.assumePosix();
     MagellanTestUtil.deny(srcDir.resolve("xyz"));
     assertTrue(Files.exists(srcDir));
     FileUtils.deleteDirectory(srcDir);
