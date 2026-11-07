@@ -28,7 +28,7 @@ jobs:
       run: mvn -B package -Dchangelist=-SNAPSHOT.$(date -u +%Y%m%d-%H%M)
       
     - name: "Upload artifact"
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: magellan       # name shown in the Actions UI and the name of the artefact itself + .zip! The artefact is saved in a subpath with run encoded.
         path: target/magellan-ee-*.zip  # file, folder, or glob pattern to upload
