@@ -51,6 +51,9 @@
         <include>LICENSE.txt</include>
         <include>README.md</include>
         <include>RELEASENOTES.txt</include>
+        <!-- Compatibility with old plugins -->
+        <include>plugins-compatibility-resources/magellan-client.jar</include>
+        <include>plugins-compatibility-resources/magellan-library.jar</include>
       </includes>
     </fileSet>
 
