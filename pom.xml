@@ -40,29 +40,29 @@
     -->
     <revision>1.0.0</revision>
     <changelist>-SNAPSHOT</changelist>
-    <!-- same settings as build.xml -->
     <maven.compiler.release>11</maven.compiler.release>
     <project.build.sourceEncoding>ISO-8859-1</project.build.sourceEncoding>
     <project.reporting.outputEncoding>ISO-8859-1</project.reporting.outputEncoding>
   </properties>
 
   <!--
-    The project has no external repository dependencies for compilation; all
-    libraries are shipped as local jars in lib/ (mirrors the Eclipse
-    .classpath / build.xml), so they are referenced with system scope.
-
-    Test dependencies (junit, hamcrest) are taken from Maven Central instead
-    of lib/internal so that surefire correctly detects the JUnit 4 provider
-    (it does not recognize system-scoped junit artifacts).
+    Libraries are taken from Maven Central wherever possible (issue #2). The
+    remaining jars in lib/ (system scope) are patched, abandoned or not
+    available on Maven Central and are still to be replaced.
   -->
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>com.fasterxml.jackson</groupId>
+        <artifactId>jackson-bom</artifactId>
+        <version>2.21.4</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
   <dependencies>
-    <dependency>
-      <groupId>magellan.local</groupId>
-      <artifactId>activation</artifactId>
-      <version>1.0</version>
-      <scope>system</scope>
-      <systemPath>${project.basedir}/lib/activation.jar</systemPath>
-    </dependency>
     <dependency>
       <groupId>magellan.local</groupId>
       <artifactId>ant</artifactId>
@@ -79,20 +79,6 @@
     </dependency>
     <dependency>
       <groupId>magellan.local</groupId>
-      <artifactId>commons-codec</artifactId>
-      <version>1.14</version>
-      <scope>system</scope>
-      <systemPath>${project.basedir}/lib/commons-codec-1.14.jar</systemPath>
-    </dependency>
-    <dependency>
-      <groupId>magellan.local</groupId>
-      <artifactId>commons-email</artifactId>
-      <version>1.5</version>
-      <scope>system</scope>
-      <systemPath>${project.basedir}/lib/commons-email-1.5.jar</systemPath>
-    </dependency>
-    <dependency>
-      <groupId>magellan.local</groupId>
       <artifactId>commons-httpclient</artifactId>
       <version>3.1</version>
       <scope>system</scope>
@@ -100,52 +86,10 @@
     </dependency>
     <dependency>
       <groupId>magellan.local</groupId>
-      <artifactId>commons-logging</artifactId>
-      <version>1.2</version>
-      <scope>system</scope>
-      <systemPath>${project.basedir}/lib/commons-logging-1.2.jar</systemPath>
-    </dependency>
-    <dependency>
-      <groupId>magellan.local</groupId>
       <artifactId>idw-gpl</artifactId>
       <version>1.6.1</version>
       <scope>system</scope>
       <systemPath>${project.basedir}/lib/idw-gpl-1.6.1.jar</systemPath>
-    </dependency>
-    <dependency>
-      <groupId>magellan.local</groupId>
-      <artifactId>jackson-annotations</artifactId>
-      <version>2.11.0</version>
-      <scope>system</scope>
-      <systemPath>${project.basedir}/lib/jackson-annotations-2.11.0.jar</systemPath>
-    </dependency>
-    <dependency>
-      <groupId>magellan.local</groupId>
-      <artifactId>jackson-core</artifactId>
-      <version>2.11.0</version>
-      <scope>system</scope>
-      <systemPath>${project.basedir}/lib/jackson-core-2.11.0.jar</systemPath>
-    </dependency>
-    <dependency>
-      <groupId>magellan.local</groupId>
-      <artifactId>jackson-databind</artifactId>
-      <version>2.11.0</version>
-      <scope>system</scope>
-      <systemPath>${project.basedir}/lib/jackson-databind-2.11.0.jar</systemPath>
-    </dependency>
-    <dependency>
-      <groupId>magellan.local</groupId>
-      <artifactId>javahelp</artifactId>
-      <version>2.0.05</version>
-      <scope>system</scope>
-      <systemPath>${project.basedir}/lib/javahelp-2.0.05.jar</systemPath>
-    </dependency>
-    <dependency>
-      <groupId>magellan.local</groupId>
-      <artifactId>javax.mail</artifactId>
-      <version>1.0</version>
-      <scope>system</scope>
-      <systemPath>${project.basedir}/lib/javax.mail.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>magellan.local</groupId>
@@ -160,20 +104,6 @@
       <version>1.0</version>
       <scope>system</scope>
       <systemPath>${project.basedir}/lib/jimi.jar</systemPath>
-    </dependency>
-    <dependency>
-      <groupId>magellan.local</groupId>
-      <artifactId>macify</artifactId>
-      <version>1.4</version>
-      <scope>system</scope>
-      <systemPath>${project.basedir}/lib/macify-1.4.jar</systemPath>
-    </dependency>
-    <dependency>
-      <groupId>magellan.local</groupId>
-      <artifactId>multiline-label</artifactId>
-      <version>1.18</version>
-      <scope>system</scope>
-      <systemPath>${project.basedir}/lib/multiline-label-1.18.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>magellan.local</groupId>
@@ -209,6 +139,51 @@
       <version>1.0</version>
       <scope>system</scope>
       <systemPath>${project.basedir}/lib/skins/xplookandfeel.jar</systemPath>
+    </dependency>
+
+    <!-- libraries from Maven Central (see issue #2) -->
+    <dependency>
+      <groupId>commons-codec</groupId>
+      <artifactId>commons-codec</artifactId>
+      <version>1.22.1</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-email</artifactId>
+      <version>1.6.0</version>
+    </dependency>
+    <dependency>
+      <!-- javax.mail API (also brings jakarta.activation = javax.activation) -->
+      <groupId>com.sun.mail</groupId>
+      <artifactId>jakarta.mail</artifactId>
+      <version>1.6.7</version>
+    </dependency>
+    <dependency>
+      <groupId>commons-logging</groupId>
+      <artifactId>commons-logging</artifactId>
+      <version>1.3.5</version>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-annotations</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>javax.help</groupId>
+      <artifactId>javahelp</artifactId>
+      <version>2.0.05</version>
+    </dependency>
+    <dependency>
+      <groupId>io.github.parubok</groupId>
+      <artifactId>multiline-label</artifactId>
+      <version>1.20</version>
     </dependency>
 
     <dependency>
@@ -250,6 +225,22 @@
       </resource>
     </resources>
     <plugins>
+      <!-- expose the resolved dependency jars as properties for the Ant tasks below -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <version>3.8.1</version>
+        <executions>
+          <execution>
+            <id>jar-paths</id>
+            <phase>initialize</phase>
+            <goals>
+              <goal>properties</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
       <!-- register the Eclipse source folders -->
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
@@ -298,7 +289,7 @@
         <configuration>
           <argLine>-Djava.awt.headless=true</argLine>
           <excludes>
-            <!-- not part of the release, same as build.xml -->
+            <!-- not part of the release -->
             <exclude>**/E3CommandParserTest.java</exclude>
           </excludes>
         </configuration>
@@ -309,8 +300,7 @@
         dependencies, so this uses an Ant jar task: the compiled classes plus
         the unpacked contents of all lib jars are merged into one executable
         jar (first occurrence of a duplicate entry wins). The merge order
-        follows the Class-Path of etc/manifest.mf.template, so the fat jar
-        resolves the same class versions as the classic Ant release. It
+        follows the former Class-Path of etc/manifest.mf.template. It
         replaces the thin jar produced by maven-jar-plugin.
       -->
       <plugin>
@@ -349,7 +339,7 @@
                           fork="true" failonerror="true" maxmemory="512m">
                       <arg line="'${help.files.@{lang}}'" />
                       <classpath>
-                        <pathelement location="${project.basedir}/lib/javahelp-2.0.05.jar" />
+                        <pathelement location="${javax.help:javahelp:jar}" />
                       </classpath>
                     </java>
                   </sequential>
@@ -397,29 +387,27 @@
                     All entries are zipfilesets because Ant processes
                     zipgroupfilesets after zipfilesets regardless of document
                     order, which would break the intended precedence.
-                    (jimi and macify are not in the manifest's Class-Path, but
-                    are bundled here like in the classic release's lib folder.)
+                    (jimi is not in the manifest's Class-Path, but is bundled
+                    here like in the classic release's lib folder.)
                   -->
-                  <!-- the signed activation.jar is added without its signature
-                       files (they would be invalid in the merged jar) -->
-                  <zipfileset src="${project.basedir}/lib/activation.jar"
-                              excludes="META-INF/*.SF META-INF/*.RSA META-INF/*.DSA" />
+                  <!-- signature files of signed jars are excluded (they would be
+                       invalid in the merged jar) -->
+                  <zipfileset src="${com.sun.activation:jakarta.activation:jar}" excludes="META-INF/*.SF META-INF/*.RSA META-INF/*.DSA" />
                   <zipfileset src="${project.basedir}/lib/ant-1.7.0.jar" />
                   <zipfileset src="${project.basedir}/lib/commons-beanutils-core-1.8.3.jar" />
-                  <zipfileset src="${project.basedir}/lib/commons-codec-1.14.jar" />
-                  <zipfileset src="${project.basedir}/lib/commons-email-1.5.jar" />
+                  <zipfileset src="${commons-codec:commons-codec:jar}" excludes="META-INF/*.SF META-INF/*.RSA META-INF/*.DSA" />
+                  <zipfileset src="${org.apache.commons:commons-email:jar}" excludes="META-INF/*.SF META-INF/*.RSA META-INF/*.DSA" />
                   <zipfileset src="${project.basedir}/lib/commons-httpclient-3.1.jar" />
-                  <zipfileset src="${project.basedir}/lib/commons-logging-1.2.jar" />
+                  <zipfileset src="${commons-logging:commons-logging:jar}" excludes="META-INF/*.SF META-INF/*.RSA META-INF/*.DSA" />
                   <zipfileset src="${project.basedir}/lib/idw-gpl-1.6.1.jar" />
-                  <zipfileset src="${project.basedir}/lib/jackson-annotations-2.11.0.jar" />
-                  <zipfileset src="${project.basedir}/lib/jackson-core-2.11.0.jar" />
-                  <zipfileset src="${project.basedir}/lib/jackson-databind-2.11.0.jar" />
-                  <zipfileset src="${project.basedir}/lib/javahelp-2.0.05.jar" />
-                  <zipfileset src="${project.basedir}/lib/javax.mail.jar" />
+                  <zipfileset src="${com.fasterxml.jackson.core:jackson-annotations:jar}" excludes="META-INF/*.SF META-INF/*.RSA META-INF/*.DSA" />
+                  <zipfileset src="${com.fasterxml.jackson.core:jackson-core:jar}" excludes="META-INF/*.SF META-INF/*.RSA META-INF/*.DSA" />
+                  <zipfileset src="${com.fasterxml.jackson.core:jackson-databind:jar}" excludes="META-INF/*.SF META-INF/*.RSA META-INF/*.DSA" />
+                  <zipfileset src="${javax.help:javahelp:jar}" excludes="META-INF/*.SF META-INF/*.RSA META-INF/*.DSA" />
+                  <zipfileset src="${com.sun.mail:jakarta.mail:jar}" excludes="META-INF/*.SF META-INF/*.RSA META-INF/*.DSA" />
                   <zipfileset src="${project.basedir}/lib/jfreechart.jar" />
                   <zipfileset src="${project.basedir}/lib/jimi.jar" />
-                  <zipfileset src="${project.basedir}/lib/macify-1.4.jar" />
-                  <zipfileset src="${project.basedir}/lib/multiline-label-1.18.jar" />
+                  <zipfileset src="${io.github.parubok:multiline-label:jar}" excludes="META-INF/*.SF META-INF/*.RSA META-INF/*.DSA" />
                   <zipfileset src="${project.basedir}/lib/skins/kunststoff-2_0_2.jar" />
                   <zipfileset src="${project.basedir}/lib/skins/liquidlnf-2.9.1.jar" />
                   <zipfileset src="${project.basedir}/lib/skins/looks-1.3b1.jar" />
