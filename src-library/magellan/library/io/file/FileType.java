@@ -303,18 +303,6 @@ public class FileType {
   }
 
   /**
-   * Determines, whether a file is a BZIP2 filetype by Jonathan 20060917 (Fiete)
-   * 
-   * @return true, if the file is of BZIP2 type
-   * @throws IOException
-   * @deprecated we don't seem to need this any more
-   */
-  @Deprecated
-  public boolean isBZIP2File() throws IOException {
-    return this instanceof BZip2FileType;
-  }
-
-  /**
    * Signals that the file cannot be written to.
    */
   public static class ReadOnlyException extends IOException {

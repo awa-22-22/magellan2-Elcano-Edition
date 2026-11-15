@@ -24,14 +24,15 @@
 package magellan.client.actions.desktop;
 
 import java.awt.event.ActionEvent;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 import javax.swing.JOptionPane;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.apache.tools.ant.filters.StringInputStream;
 import org.xml.sax.SAXException;
 
 import magellan.client.Client;
@@ -114,8 +115,8 @@ public class LayoutNewAction extends MenuAction {
           DocumentBuilder builder;
           try {
             builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-            builder.parse(new StringInputStream("<rootwindow name='" + newLayoutName
-                + "' isActive='false'></rootwindow>"));
+            builder.parse(new ByteArrayInputStream(("<rootwindow name='" + newLayoutName
+                + "' isActive='false'></rootwindow>").getBytes(StandardCharsets.UTF_8)));
           } catch (ParserConfigurationException ex) {
             // not our problem now
           } catch (SAXException ex) {

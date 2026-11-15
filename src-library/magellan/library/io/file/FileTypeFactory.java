@@ -83,9 +83,6 @@ public class FileTypeFactory {
     if (fileNameLC.endsWith(FileType.GZIP))
       return new GZipFileType(fileName, readonly);
 
-    if (fileNameLC.endsWith(FileType.BZIP2))
-      return new BZip2FileType(fileName, readonly);
-
     if (fileNameLC.endsWith(FileType.ZIP))
       return createZipFileType(fileName, readonly, ftc);
 

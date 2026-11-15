@@ -1,7 +1,7 @@
 // class magellan.library.utils.HTTPResult
-// created on 26.02.2008
+// created on 02.09.2007
 //
-// Copyright 2003-2008 by magellan project team
+// Copyright 2003-2007 by magellan project team
 //
 // Author : $Author: $
 // $Id: $
@@ -23,94 +23,39 @@
 //
 package magellan.library.utils;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.net.http.HttpResponse;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Hashtable;
 import java.util.Map;
-
-import org.apache.commons.httpclient.Header;
-import org.apache.commons.httpclient.methods.GetMethod;
-import org.apache.commons.httpclient.methods.PostMethod;
-import org.apache.commons.httpclient.methods.PutMethod;
-
-import magellan.library.utils.logging.Logger;
 
 /**
  * This is a container for HTTP responses.
  *
  * @author <a href="mailto:thoralf@m84.de">Thoralf Rickert</a>
- * @version 1.0, erstellt am 02.09.2007
+ * @version 1.0, 02.09.2007
  */
 public class HTTPResult {
-  /** Log-class */
-  private static final Logger log = Logger.getInstance(HTTPResult.class);
-
-  protected GetMethod method = null;
   protected int status = 0;
   protected byte[] result = null;
 
   protected Hashtable<String, String> header = new Hashtable<String, String>();
 
   /**
-   * Creates a HTTP Result instance based on the results inside the given method
+   * Creates a HTTP Result instance based on the given response.
    */
-  protected HTTPResult(GetMethod method, boolean async) {
-    this.method = method;
-    try {
-      status = method.getStatusCode();
-
-      if (!async) {
-        result = setResult(method.getResponseBodyAsStream());
-        Header[] headers = method.getResponseHeaders();
-
-        for (Header h : headers) {
-          header.put(h.getName(), h.getValue());
-        }
+  protected HTTPResult(HttpResponse<byte[]> response) {
+    status = response.statusCode();
+    result = response.body();
+    response.headers().map().forEach((name, values) -> {
+      if (!values.isEmpty()) {
+        header.put(name, values.get(0));
       }
-    } catch (Exception exception) {
-      HTTPResult.log.error("Konnte GET-Result nicht auslesen. " + exception.getMessage());
-    }
+    });
   }
 
   /**
-   * Creates a HTTP Result instance based on the results inside the given method
-   */
-  protected HTTPResult(PostMethod method) {
-    try {
-
-      result = setResult(method.getResponseBodyAsStream());
-      status = method.getStatusCode();
-      Header[] headers = method.getResponseHeaders();
-      for (Header h : headers) {
-        header.put(h.getName(), h.getValue());
-      }
-
-    } catch (Exception exception) {
-      HTTPResult.log.error("Konnte POST-Result nicht auslesen. " + exception.getMessage());
-    }
-  }
-
-  /**
-   * Creates a HTTP Result instance based on the results inside the given method
-   */
-  protected HTTPResult(PutMethod method) {
-    try {
-
-      result = setResult(method.getResponseBodyAsStream());
-      status = method.getStatusCode();
-      Header[] headers = method.getResponseHeaders();
-      for (Header h : headers) {
-        header.put(h.getName(), h.getValue());
-      }
-
-    } catch (Exception exception) {
-      HTTPResult.log.error("Konnte PUT-Result nicht auslesen. " + exception.getMessage());
-    }
-  }
-
-  /**
-   * Liefert das Resultat des Webservers.
+   * Returns the result of the web server.
    */
   public byte[] getResult() {
     return result;
@@ -120,23 +65,18 @@ public class HTTPResult {
    * Returns the result from the webserver as a String. This method verifies the given encoding.
    */
   public String getResultAsString() {
-    try {
-      if (result == null) {
-        result = setResult(method.getResponseBodyAsStream());
-      }
-    } catch (Exception exception) {
-      // do nothing
-    }
+    if (result == null)
+      return "";
 
     String encoding = getEncoding();
     if (encoding != null) {
       try {
-        return new String(result, encoding);
+        return new String(result, Charset.forName(encoding));
       } catch (Exception exception) {
         // do nothing
       }
     }
-    return new String(result);
+    return new String(result, StandardCharsets.UTF_8);
   }
 
   /**
@@ -151,44 +91,28 @@ public class HTTPResult {
     return encoding;
   }
 
-  private byte[] setResult(InputStream stream) throws Exception {
-    ByteArrayOutputStream outstream = new ByteArrayOutputStream(4096);
-    byte[] buffer = new byte[4096];
-    int len;
-    while ((len = stream.read(buffer)) > 0) {
-      outstream.write(buffer, 0, len);
-    }
-    outstream.close();
-    return outstream.toByteArray();
-  }
-
   /**
-   * Returns the response body as stream. This stream is only available, if async mode is enabled.
-   */
-  public InputStream getStream() throws IOException {
-    return method.getResponseBodyAsStream();
-  }
-
-  /**
-   * Liefert den vom Server übermittelten Statuscode.
+   * Returns the status code sent by the server.
    */
   public int getStatus() {
     return status;
   }
 
   /**
-   * Liefert den Header der Response vom Server.
+   * Returns the headers of the response (first value of each header).
    */
   public Map<String, String> getHeader() {
     return header;
   }
 
   /**
-   * Returns the value for the header with the given key name.
+   * Returns the value for the header with the given key name (case-insensitive).
    */
   public String getHeader(String key) {
-    if (header.containsKey(key))
-      return header.get(key);
+    for (Map.Entry<String, String> e : header.entrySet()) {
+      if (e.getKey().equalsIgnoreCase(key))
+        return e.getValue();
+    }
     return null;
   }
 

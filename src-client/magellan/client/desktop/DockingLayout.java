@@ -25,9 +25,11 @@ package magellan.client.desktop;
 
 import java.awt.Dimension;
 import java.awt.Point;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -41,7 +43,6 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
-import org.apache.tools.ant.filters.StringInputStream;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
@@ -388,7 +389,7 @@ public class DockingLayout {
       save(buffer, window, " ");
 
       DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-      Document document = builder.parse(new StringInputStream(buffer.toString()));
+      Document document = builder.parse(new ByteArrayInputStream(buffer.toString().getBytes(StandardCharsets.UTF_8)));
       return document.getDocumentElement();
     } catch (Exception exception) {
       DockingLayout.log.error(exception);
@@ -688,7 +689,7 @@ public class DockingLayout {
     DocumentBuilder builder;
     try {
       builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-      Document document = builder.parse(new StringInputStream(buffer.toString()));
+      Document document = builder.parse(new ByteArrayInputStream(buffer.toString().getBytes(StandardCharsets.UTF_8)));
       return document.getDocumentElement();
     } catch (ParserConfigurationException e) {
       throw new LayoutException("could not create default layout", e);

@@ -65,45 +65,18 @@
   <dependencies>
     <dependency>
       <groupId>magellan.local</groupId>
-      <artifactId>ant</artifactId>
-      <version>1.7.0</version>
-      <scope>system</scope>
-      <systemPath>${project.basedir}/lib/ant-1.7.0.jar</systemPath>
-    </dependency>
-    <dependency>
-      <groupId>magellan.local</groupId>
-      <artifactId>commons-beanutils-core</artifactId>
-      <version>1.8.3</version>
-      <scope>system</scope>
-      <systemPath>${project.basedir}/lib/commons-beanutils-core-1.8.3.jar</systemPath>
-    </dependency>
-    <dependency>
-      <groupId>magellan.local</groupId>
-      <artifactId>commons-httpclient</artifactId>
-      <version>3.1</version>
-      <scope>system</scope>
-      <systemPath>${project.basedir}/lib/commons-httpclient-3.1.jar</systemPath>
-    </dependency>
-    <dependency>
-      <groupId>magellan.local</groupId>
       <artifactId>idw-gpl</artifactId>
       <version>1.6.1</version>
       <scope>system</scope>
       <systemPath>${project.basedir}/lib/idw-gpl-1.6.1.jar</systemPath>
     </dependency>
     <dependency>
+      <!-- old com.jrefinery.chart API (JFreeChart 0.9.x), used by the skill chart -->
       <groupId>magellan.local</groupId>
       <artifactId>jfreechart</artifactId>
       <version>1.0</version>
       <scope>system</scope>
       <systemPath>${project.basedir}/lib/jfreechart.jar</systemPath>
-    </dependency>
-    <dependency>
-      <groupId>magellan.local</groupId>
-      <artifactId>jimi</artifactId>
-      <version>1.0</version>
-      <scope>system</scope>
-      <systemPath>${project.basedir}/lib/jimi.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>magellan.local</groupId>
@@ -142,6 +115,16 @@
     </dependency>
 
     <!-- libraries from Maven Central (see issue #2) -->
+    <dependency>
+      <groupId>commons-beanutils</groupId>
+      <artifactId>commons-beanutils</artifactId>
+      <version>1.11.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-compress</artifactId>
+      <version>1.28.0</version>
+    </dependency>
     <dependency>
       <groupId>commons-codec</groupId>
       <artifactId>commons-codec</artifactId>
@@ -387,17 +370,17 @@
                     All entries are zipfilesets because Ant processes
                     zipgroupfilesets after zipfilesets regardless of document
                     order, which would break the intended precedence.
-                    (jimi is not in the manifest's Class-Path, but is bundled
-                    here like in the classic release's lib folder.)
                   -->
                   <!-- signature files of signed jars are excluded (they would be
                        invalid in the merged jar) -->
                   <zipfileset src="${com.sun.activation:jakarta.activation:jar}" excludes="META-INF/*.SF META-INF/*.RSA META-INF/*.DSA" />
-                  <zipfileset src="${project.basedir}/lib/ant-1.7.0.jar" />
-                  <zipfileset src="${project.basedir}/lib/commons-beanutils-core-1.8.3.jar" />
+                  <zipfileset src="${commons-beanutils:commons-beanutils:jar}" excludes="META-INF/*.SF META-INF/*.RSA META-INF/*.DSA" />
+                  <zipfileset src="${commons-collections:commons-collections:jar}" excludes="META-INF/*.SF META-INF/*.RSA META-INF/*.DSA" />
+                  <zipfileset src="${org.apache.commons:commons-compress:jar}" excludes="META-INF/*.SF META-INF/*.RSA META-INF/*.DSA" />
+                  <zipfileset src="${commons-io:commons-io:jar}" excludes="META-INF/*.SF META-INF/*.RSA META-INF/*.DSA" />
+                  <zipfileset src="${org.apache.commons:commons-lang3:jar}" excludes="META-INF/*.SF META-INF/*.RSA META-INF/*.DSA" />
                   <zipfileset src="${commons-codec:commons-codec:jar}" excludes="META-INF/*.SF META-INF/*.RSA META-INF/*.DSA" />
                   <zipfileset src="${org.apache.commons:commons-email:jar}" excludes="META-INF/*.SF META-INF/*.RSA META-INF/*.DSA" />
-                  <zipfileset src="${project.basedir}/lib/commons-httpclient-3.1.jar" />
                   <zipfileset src="${commons-logging:commons-logging:jar}" excludes="META-INF/*.SF META-INF/*.RSA META-INF/*.DSA" />
                   <zipfileset src="${project.basedir}/lib/idw-gpl-1.6.1.jar" />
                   <zipfileset src="${com.fasterxml.jackson.core:jackson-annotations:jar}" excludes="META-INF/*.SF META-INF/*.RSA META-INF/*.DSA" />
@@ -405,9 +388,8 @@
                   <zipfileset src="${com.fasterxml.jackson.core:jackson-databind:jar}" excludes="META-INF/*.SF META-INF/*.RSA META-INF/*.DSA" />
                   <zipfileset src="${javax.help:javahelp:jar}" excludes="META-INF/*.SF META-INF/*.RSA META-INF/*.DSA" />
                   <zipfileset src="${com.sun.mail:jakarta.mail:jar}" excludes="META-INF/*.SF META-INF/*.RSA META-INF/*.DSA" />
-                  <zipfileset src="${project.basedir}/lib/jfreechart.jar" />
-                  <zipfileset src="${project.basedir}/lib/jimi.jar" />
                   <zipfileset src="${io.github.parubok:multiline-label:jar}" excludes="META-INF/*.SF META-INF/*.RSA META-INF/*.DSA" />
+                  <zipfileset src="${project.basedir}/lib/jfreechart.jar" />
                   <zipfileset src="${project.basedir}/lib/skins/kunststoff-2_0_2.jar" />
                   <zipfileset src="${project.basedir}/lib/skins/liquidlnf-2.9.1.jar" />
                   <zipfileset src="${project.basedir}/lib/skins/looks-1.3b1.jar" />

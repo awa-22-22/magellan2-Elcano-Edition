@@ -88,8 +88,6 @@ import javax.swing.border.TitledBorder;
 import javax.swing.text.JTextComponent;
 
 import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.httpclient.methods.multipart.FilePart;
-import org.apache.commons.httpclient.methods.multipart.Part;
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.MultiPartEmail;
 
@@ -2052,13 +2050,10 @@ public class OrderWriterDialog extends InternationalizedDataDialog {
         progress.setProgress("Sending ...", -1);
         HTTPClient client = new HTTPClient(localSettings);
         OrderWriterDialog.log.info("sending...");
-        client.setAuthentication(faction.getID().toString(), faction.getPassword(), uri.getHost(), -1, null, null);
+        client.setAuthentication(faction.getID().toString(), faction.getPassword(), uri.getHost(), -1);
         client.setTimeOut(PropertiesHelper.getInteger(localSettings, PropertiesHelper.ORDERWRITER_SERVER_TIMEOUT, 30));
 
-        Part[] parts = {
-            new FilePart("input", orderFile)
-        };
-        HTTPResult result = client.post(uri, parts);
+        HTTPResult result = client.postFile(uri, "input", orderFile);
 
         int status = result == null ? -1 : result.getStatus();
 
