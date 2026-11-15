@@ -45,7 +45,8 @@ import magellan.library.utils.Encoding;
 import magellan.library.utils.PropertiesHelper;
 import magellan.library.utils.Resources;
 import magellan.library.utils.logging.Logger;
-import net.infonode.docking.DockingWindowListener;
+import net.infonode.docking.DockingWindow;
+import net.infonode.docking.DockingWindowAdapter;
 import net.infonode.docking.RootWindow;
 import net.infonode.docking.View;
 import net.infonode.docking.properties.RootWindowProperties;
@@ -130,8 +131,19 @@ public class DFBInstance implements DockingFrameworkBuilder {
       View view = new View(Resources.get("dock." + key + ".title"), null, component);
       view.setName(key);
       view.setToolTipText(Resources.get("dock." + key + ".tooltip"));
-      if (component instanceof DockingWindowListener) {
-        view.addListener((DockingWindowListener) component);
+      if (component instanceof DockVisibilityListener) {
+        final DockVisibilityListener listener = (DockVisibilityListener) component;
+        view.addListener(new DockingWindowAdapter() {
+          @Override
+          public void windowShown(DockingWindow window) {
+            listener.dockShown();
+          }
+
+          @Override
+          public void windowHidden(DockingWindow window) {
+            listener.dockHidden();
+          }
+        });
       }
       viewMap.addView(key, view);
       views.put(key, view);

@@ -1545,18 +1545,4 @@ public class MagellanDesktop extends JPanel implements WindowListener, ActionLis
   public void windowUndocking(DockingWindow window) throws OperationAbortedException {
     // do nothing
   }
-
-  /**
-   * adds the listener to the DockingFrameWork
-   *
-   * @param listener
-   */
-  public void addDockingWindowListener(DockingWindowListener listener) {
-    if (splitRoot != null) {
-      splitRoot.addListener(listener);
-    } else {
-      MagellanDesktop.log.error("unable to add DockingWindowListener! (no RootWindow)");
-    }
-  }
-
 }

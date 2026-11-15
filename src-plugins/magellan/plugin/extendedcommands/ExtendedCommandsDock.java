@@ -37,6 +37,7 @@ import javax.swing.JTabbedPane;
 
 import magellan.client.Client;
 import magellan.client.desktop.DesktopEnvironment;
+import magellan.client.desktop.DockVisibilityListener;
 import magellan.client.desktop.MagellanDesktop;
 import magellan.client.event.SelectionEvent;
 import magellan.client.event.SelectionListener;
@@ -49,10 +50,6 @@ import magellan.library.utils.MagellanImages;
 import magellan.library.utils.Resources;
 import magellan.library.utils.Utils;
 import magellan.library.utils.logging.Logger;
-import net.infonode.docking.DockingWindow;
-import net.infonode.docking.DockingWindowListener;
-import net.infonode.docking.OperationAbortedException;
-import net.infonode.docking.View;
 
 /**
  * This is a dialog to edit the script/commands for a given unit. <br />
@@ -61,7 +58,7 @@ import net.infonode.docking.View;
  * @author Thoralf Rickert
  * @version 1.0, 11.09.2007
  */
-public class ExtendedCommandsDock extends JPanel implements ActionListener, DockingWindowListener,
+public class ExtendedCommandsDock extends JPanel implements ActionListener, DockVisibilityListener,
     SelectionListener {
   public static final String IDENTIFIER = "ExtendedCommands";
   private static final Logger log = Logger.getInstance(ExtendedCommandsDock.class);
@@ -383,125 +380,17 @@ public class ExtendedCommandsDock extends JPanel implements ActionListener, Dock
   }
 
   /**
-   * @see net.infonode.docking.DockingWindowListener#viewFocusChanged(net.infonode.docking.View,
-   *      net.infonode.docking.View)
+   * @see magellan.client.desktop.DockVisibilityListener#dockShown()
    */
-  public void viewFocusChanged(View previouslyFocusedView, View focusedView) {
-    // no action
-  }
-
-  /**
-   * @see net.infonode.docking.DockingWindowListener#windowAdded(net.infonode.docking.DockingWindow,
-   *      net.infonode.docking.DockingWindow)
-   */
-  public void windowAdded(DockingWindow addedToWindow, DockingWindow addedWindow) {
-    // no action
-  }
-
-  /**
-   * @see net.infonode.docking.DockingWindowListener#windowClosed(net.infonode.docking.DockingWindow)
-   */
-  public void windowClosed(DockingWindow window) {
-    // no action
-  }
-
-  /**
-   * @see net.infonode.docking.DockingWindowListener#windowClosing(net.infonode.docking.DockingWindow)
-   */
-  public void windowClosing(DockingWindow window) throws OperationAbortedException {
-    // no action
-  }
-
-  /**
-   * @see net.infonode.docking.DockingWindowListener#windowDocked(net.infonode.docking.DockingWindow)
-   */
-  public void windowDocked(DockingWindow window) {
-    // no action
-  }
-
-  /**
-   * @see net.infonode.docking.DockingWindowListener#windowDocking(net.infonode.docking.DockingWindow)
-   */
-  public void windowDocking(DockingWindow window) throws OperationAbortedException {
-    // no action
-  }
-
-  /**
-   * @see net.infonode.docking.DockingWindowListener#windowHidden(net.infonode.docking.DockingWindow)
-   */
-  public void windowHidden(DockingWindow window) {
-    visible = false;
-  }
-
-  /**
-   * @see net.infonode.docking.DockingWindowListener#windowMaximized(net.infonode.docking.DockingWindow)
-   */
-  public void windowMaximized(DockingWindow window) {
-    // no action
-  }
-
-  /**
-   * @see net.infonode.docking.DockingWindowListener#windowMaximizing(net.infonode.docking.DockingWindow)
-   */
-  public void windowMaximizing(DockingWindow window) throws OperationAbortedException {
-    // no action
-  }
-
-  /**
-   * @see net.infonode.docking.DockingWindowListener#windowMinimized(net.infonode.docking.DockingWindow)
-   */
-  public void windowMinimized(DockingWindow window) {
-    // no action
-  }
-
-  /**
-   * @see net.infonode.docking.DockingWindowListener#windowMinimizing(net.infonode.docking.DockingWindow)
-   */
-  public void windowMinimizing(DockingWindow window) throws OperationAbortedException {
-    // no action
-  }
-
-  /**
-   * @see net.infonode.docking.DockingWindowListener#windowRemoved(net.infonode.docking.DockingWindow,
-   *      net.infonode.docking.DockingWindow)
-   */
-  public void windowRemoved(DockingWindow removedFromWindow, DockingWindow removedWindow) {
-    // no action
-  }
-
-  /**
-   * @see net.infonode.docking.DockingWindowListener#windowRestored(net.infonode.docking.DockingWindow)
-   */
-  public void windowRestored(DockingWindow window) {
-    // no action
-  }
-
-  /**
-   * @see net.infonode.docking.DockingWindowListener#windowRestoring(net.infonode.docking.DockingWindow)
-   */
-  public void windowRestoring(DockingWindow window) throws OperationAbortedException {
-    // no action
-  }
-
-  /**
-   * @see net.infonode.docking.DockingWindowListener#windowShown(net.infonode.docking.DockingWindow)
-   */
-  public void windowShown(DockingWindow window) {
+  public void dockShown() {
     visible = true;
   }
 
   /**
-   * @see net.infonode.docking.DockingWindowListener#windowUndocked(net.infonode.docking.DockingWindow)
+   * @see magellan.client.desktop.DockVisibilityListener#dockHidden()
    */
-  public void windowUndocked(DockingWindow window) {
-    // no action
-  }
-
-  /**
-   * @see net.infonode.docking.DockingWindowListener#windowUndocking(net.infonode.docking.DockingWindow)
-   */
-  public void windowUndocking(DockingWindow window) throws OperationAbortedException {
-    // no action
+  public void dockHidden() {
+    visible = false;
   }
 
   /**
