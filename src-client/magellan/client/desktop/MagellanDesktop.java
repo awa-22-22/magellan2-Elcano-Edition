@@ -51,13 +51,6 @@ import magellan.client.utils.SwingUtils;
 import magellan.library.event.GameDataEvent;
 import magellan.library.utils.PropertiesHelper;
 import magellan.library.utils.logging.Logger;
-import net.infonode.docking.DockingWindow;
-import net.infonode.docking.DockingWindowListener;
-import net.infonode.docking.OperationAbortedException;
-import net.infonode.docking.RootWindow;
-import net.infonode.docking.View;
-import net.infonode.docking.properties.RootWindowProperties;
-import net.infonode.tabbedpanel.TabAreaVisiblePolicy;
 
 /**
  * This class represents the Magellan Desktop. It contains all visible components. We use this class
@@ -68,7 +61,7 @@ import net.infonode.tabbedpanel.TabAreaVisiblePolicy;
  * @author Thoralf Rickert
  */
 public class MagellanDesktop extends JPanel implements WindowListener, ActionListener,
-    PreferencesFactory, DockingWindowListener {
+    PreferencesFactory {
   private static final Logger log = Logger.getInstance(MagellanDesktop.class);
 
   private static MagellanDesktop _instance = null;
@@ -133,7 +126,7 @@ public class MagellanDesktop extends JPanel implements WindowListener, ActionLis
    * Stores the root component of the splitted desktop. So the desktop can be saved even if a
    * mode-changed occured.
    */
-  private RootWindow splitRoot;
+  private JComponent splitRoot;
 
   /** Holds the client frame. This is for (de)iconification compares. */
   private Client client;
@@ -239,6 +232,13 @@ public class MagellanDesktop extends JPanel implements WindowListener, ActionLis
   }
 
   /**
+   * Returns the main window of the client.
+   */
+  public Client getClientFrame() {
+    return client;
+  }
+
+  /**
    *
    */
   public void setWorkSpaceChooser(boolean enabled) {
@@ -338,8 +338,7 @@ public class MagellanDesktop extends JPanel implements WindowListener, ActionLis
         if (menuItem instanceof JCheckBoxMenuItem) {
           JCheckBoxMenuItem item = (JCheckBoxMenuItem) menuItem;
           String name = item.getActionCommand().substring(5);
-          DockingWindow window = findDockingWindow(splitRoot, name);
-          if (window != null) {
+          if (dockingFrameworkBuilder.isVisible(name)) {
             item.setSelected(true);
           }
         }
@@ -365,10 +364,6 @@ public class MagellanDesktop extends JPanel implements WindowListener, ActionLis
     splitRoot =
         dockingFrameworkBuilder.buildDesktop(components, new File(settingsDir,
             MagellanDesktop.DOCKING_LAYOUT_FILE));
-    if (splitRoot != null) {
-      splitRoot.addListener(this);
-    }
-
     if (splitRoot == null)
       return false;
 
@@ -706,20 +701,6 @@ public class MagellanDesktop extends JPanel implements WindowListener, ActionLis
     }
   }
 
-  private DockingWindow findDockingWindow(DockingWindow root, String name) {
-    if (root == null)
-      return null;
-    if (root.getName() != null && root.getName().equals(name))
-      return root;
-
-    for (int index = 0; index < root.getChildWindowCount(); index++) {
-      DockingWindow window = findDockingWindow(root.getChildWindow(index), name);
-      if (window != null)
-        return window;
-    }
-    return null;
-  }
-
   /**
    *
    */
@@ -738,10 +719,8 @@ public class MagellanDesktop extends JPanel implements WindowListener, ActionLis
             restoreView(name);
           } else {
             // close dock
-            DockingWindow window = findDockingWindow(splitRoot, name);
-            if (window != null) {
-              window.close();
-            } else {
+            dockingFrameworkBuilder.setVisible(name, false);
+            if (!dockingFrameworkBuilder.isVisible(name)) {
               menu.setSelected(false);
             }
 
@@ -762,15 +741,7 @@ public class MagellanDesktop extends JPanel implements WindowListener, ActionLis
     Client.INSTANCE.getProperties().setProperty(PropertiesHelper.CLIENTPREFERENCES_DONT_SHOW_TABS,
         Boolean.toString(!showTabs));
 
-    RootWindow root = splitRoot;
-    RootWindowProperties prop = root.getRootWindowProperties();
-    if (!showTabs) {
-      prop.getTabWindowProperties().getTabbedPanelProperties().getTabAreaProperties()
-          .setTabAreaVisiblePolicy(TabAreaVisiblePolicy.MORE_THAN_ONE_TAB);
-    } else {
-      prop.getTabWindowProperties().getTabbedPanelProperties().getTabAreaProperties()
-          .setTabAreaVisiblePolicy(TabAreaVisiblePolicy.ALWAYS);
-    }
+    dockingFrameworkBuilder.setTabVisibility(showTabs);
   }
 
   /**
@@ -779,11 +750,7 @@ public class MagellanDesktop extends JPanel implements WindowListener, ActionLis
    * @param name
    */
   public void restoreView(String name) {
-    View view = dockingFrameworkBuilder.getViewMap().getView(name);
-    if (view != null) {
-      view.restore();
-      view.makeVisible();
-    }
+    dockingFrameworkBuilder.restoreView(name);
   }
 
   // /////////////////////////////////////
@@ -1369,7 +1336,7 @@ public class MagellanDesktop extends JPanel implements WindowListener, ActionLis
    */
   public void setVisible(String viewName, boolean setVisible) {
     if (splitRoot != null) {
-      dockingFrameworkBuilder.setVisible(splitRoot, viewName, setVisible);
+      dockingFrameworkBuilder.setVisible(viewName, setVisible);
 
       if (desktopMenu != null) {
         if (setVisible) {
@@ -1382,19 +1349,11 @@ public class MagellanDesktop extends JPanel implements WindowListener, ActionLis
   }
 
   /**
-   * @see net.infonode.docking.DockingWindowListener#viewFocusChanged(net.infonode.docking.View,
-   *      net.infonode.docking.View)
-   */
-  public void viewFocusChanged(View previouslyFocusedView, View focusedView) {
-    // do nothing
-  }
-
-  /**
    * Enabled a desktop menu entry for the given View
    */
   public void setActive(String viewName) {
     // inform desktopmenu
-    if (viewName != null) {
+    if (viewName != null && desktopMenu != null) {
       for (int index = 0; index < desktopMenu.getItemCount(); index++) {
         if (desktopMenu.getItem(index) instanceof JCheckBoxMenuItem) {
           JCheckBoxMenuItem menu = (JCheckBoxMenuItem) desktopMenu.getItem(index);
@@ -1411,7 +1370,7 @@ public class MagellanDesktop extends JPanel implements WindowListener, ActionLis
    */
   public void setInActive(String viewName) {
     // inform desktopmenu
-    if (viewName != null) {
+    if (viewName != null && desktopMenu != null) {
       for (int index = 0; index < desktopMenu.getItemCount(); index++) {
         if (desktopMenu.getItem(index) instanceof JCheckBoxMenuItem) {
           JCheckBoxMenuItem menu = (JCheckBoxMenuItem) desktopMenu.getItem(index);
@@ -1423,126 +1382,4 @@ public class MagellanDesktop extends JPanel implements WindowListener, ActionLis
     }
   }
 
-  /**
-   * @see net.infonode.docking.DockingWindowListener#windowAdded(net.infonode.docking.DockingWindow,
-   *      net.infonode.docking.DockingWindow)
-   */
-  public void windowAdded(DockingWindow addedToWindow, DockingWindow addedWindow) {
-    // inform desktopmenu
-    if (addedWindow.getName() != null) {
-      setActive(addedWindow.getName());
-    }
-  }
-
-  /**
-   * @see net.infonode.docking.DockingWindowListener#windowClosed(net.infonode.docking.DockingWindow)
-   */
-  public void windowClosed(DockingWindow window) {
-    // inform desktopmenu
-    if (window.getName() != null) {
-      setInActive(window.getName());
-    }
-  }
-
-  /**
-   * @see net.infonode.docking.DockingWindowListener#windowClosing(net.infonode.docking.DockingWindow)
-   */
-  public void windowClosing(DockingWindow window) throws OperationAbortedException {
-    // do nothing
-  }
-
-  /**
-   * @see net.infonode.docking.DockingWindowListener#windowDocked(net.infonode.docking.DockingWindow)
-   */
-  public void windowDocked(DockingWindow window) {
-    // do nothing
-  }
-
-  /**
-   * @see net.infonode.docking.DockingWindowListener#windowDocking(net.infonode.docking.DockingWindow)
-   */
-  public void windowDocking(DockingWindow window) throws OperationAbortedException {
-    // do nothing
-  }
-
-  /**
-   * @see net.infonode.docking.DockingWindowListener#windowHidden(net.infonode.docking.DockingWindow)
-   */
-  public void windowHidden(DockingWindow window) {
-    // do nothing
-  }
-
-  /**
-   * @see net.infonode.docking.DockingWindowListener#windowMaximized(net.infonode.docking.DockingWindow)
-   */
-  public void windowMaximized(DockingWindow window) {
-    // do nothing
-  }
-
-  /**
-   * @see net.infonode.docking.DockingWindowListener#windowMaximizing(net.infonode.docking.DockingWindow)
-   */
-  public void windowMaximizing(DockingWindow window) throws OperationAbortedException {
-    // do nothing
-  }
-
-  /**
-   * @see net.infonode.docking.DockingWindowListener#windowMinimized(net.infonode.docking.DockingWindow)
-   */
-  public void windowMinimized(DockingWindow window) {
-    // do nothing
-  }
-
-  /**
-   * @see net.infonode.docking.DockingWindowListener#windowMinimizing(net.infonode.docking.DockingWindow)
-   */
-  public void windowMinimizing(DockingWindow window) throws OperationAbortedException {
-    // do nothing
-  }
-
-  /**
-   * @see net.infonode.docking.DockingWindowListener#windowRemoved(net.infonode.docking.DockingWindow,
-   *      net.infonode.docking.DockingWindow)
-   */
-  public void windowRemoved(DockingWindow removedFromWindow, DockingWindow removedWindow) {
-    // inform desktopmenu
-    if (removedWindow.getName() != null) {
-      setInActive(removedFromWindow.getName());
-    }
-  }
-
-  /**
-   * @see net.infonode.docking.DockingWindowListener#windowRestored(net.infonode.docking.DockingWindow)
-   */
-  public void windowRestored(DockingWindow window) {
-    // do nothing
-  }
-
-  /**
-   * @see net.infonode.docking.DockingWindowListener#windowRestoring(net.infonode.docking.DockingWindow)
-   */
-  public void windowRestoring(DockingWindow window) throws OperationAbortedException {
-    // do nothing
-  }
-
-  /**
-   * @see net.infonode.docking.DockingWindowListener#windowShown(net.infonode.docking.DockingWindow)
-   */
-  public void windowShown(DockingWindow window) {
-    // do nothing
-  }
-
-  /**
-   * @see net.infonode.docking.DockingWindowListener#windowUndocked(net.infonode.docking.DockingWindow)
-   */
-  public void windowUndocked(DockingWindow window) {
-    // do nothing
-  }
-
-  /**
-   * @see net.infonode.docking.DockingWindowListener#windowUndocking(net.infonode.docking.DockingWindow)
-   */
-  public void windowUndocking(DockingWindow window) throws OperationAbortedException {
-    // do nothing
-  }
 }

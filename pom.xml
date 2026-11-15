@@ -64,11 +64,15 @@
 
   <dependencies>
     <dependency>
-      <groupId>magellan.local</groupId>
-      <artifactId>idw-gpl</artifactId>
-      <version>1.6.1</version>
-      <scope>system</scope>
-      <systemPath>${project.basedir}/lib/idw-gpl-1.6.1.jar</systemPath>
+      <!-- docking framework of the client desktop -->
+      <groupId>io.github.andrewauclair</groupId>
+      <artifactId>modern-docking-api</artifactId>
+      <version>1.4.9</version>
+    </dependency>
+    <dependency>
+      <groupId>io.github.andrewauclair</groupId>
+      <artifactId>modern-docking-single-app</artifactId>
+      <version>1.4.9</version>
     </dependency>
     <dependency>
       <!-- old com.jrefinery.chart API (JFreeChart 0.9.x), used by the skill chart -->
@@ -382,7 +386,8 @@
                   <zipfileset src="${commons-codec:commons-codec:jar}" excludes="META-INF/*.SF META-INF/*.RSA META-INF/*.DSA" />
                   <zipfileset src="${org.apache.commons:commons-email:jar}" excludes="META-INF/*.SF META-INF/*.RSA META-INF/*.DSA" />
                   <zipfileset src="${commons-logging:commons-logging:jar}" excludes="META-INF/*.SF META-INF/*.RSA META-INF/*.DSA" />
-                  <zipfileset src="${project.basedir}/lib/idw-gpl-1.6.1.jar" />
+                  <zipfileset src="${io.github.andrewauclair:modern-docking-api:jar}" excludes="META-INF/*.SF META-INF/*.RSA META-INF/*.DSA module-info.class" />
+                  <zipfileset src="${io.github.andrewauclair:modern-docking-single-app:jar}" excludes="META-INF/*.SF META-INF/*.RSA META-INF/*.DSA module-info.class" />
                   <zipfileset src="${com.fasterxml.jackson.core:jackson-annotations:jar}" excludes="META-INF/*.SF META-INF/*.RSA META-INF/*.DSA" />
                   <zipfileset src="${com.fasterxml.jackson.core:jackson-core:jar}" excludes="META-INF/*.SF META-INF/*.RSA META-INF/*.DSA" />
                   <zipfileset src="${com.fasterxml.jackson.core:jackson-databind:jar}" excludes="META-INF/*.SF META-INF/*.RSA META-INF/*.DSA" />

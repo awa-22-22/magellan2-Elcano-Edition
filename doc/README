@@ -15,7 +15,7 @@ activation.jar			???			Sun?			Sun???						Email
 commons-http-client-3.1.jar	3.1		Apache			http://hc.apache.org/httpclient-3.x/		Version check
 commons-codec-1.14.jar	1.14		Apache			http://commons.apache.org/codec/		Version check?
 commons-logging-1.2.jar	1.2			Apache			http://commons.apache.org/logging/		Version check?
-idw-gpl.jar				1.6.1		GPL				http://www.infonode.net				Docking Framework
+modern-docking			1.4.9		MIT				https://github.com/andrewauclair/ModernDocking	Docking Framework
 jfreechart				0.5.6		(reduced) LGPL	http://jfreechart.sourceforge.net		Skillchart
 javahelp.jar			2.0.05		Extended Sun Binary Code License	https://mvnrepository.com/artifact/javax.help/javahelp			Help
 -jaxp-api.jar			?? TODO		AFS 1.1/W3C Software License	?? TODO						Look&Feel

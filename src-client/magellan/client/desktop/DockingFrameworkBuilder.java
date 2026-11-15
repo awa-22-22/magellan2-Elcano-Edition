@@ -8,48 +8,91 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Properties;
 
+import javax.swing.JComponent;
 import javax.swing.JMenu;
 
-import net.infonode.docking.RootWindow;
-import net.infonode.docking.View;
-import net.infonode.docking.util.StringViewMap;
-
+/**
+ * Builds and manages the docking desktop. Implementations hide the docking library; callers only
+ * use the component keys (e.g. {@link MagellanDesktop#MAP_IDENTIFIER}).
+ */
 public interface DockingFrameworkBuilder {
 
-  // internal?
-  void setInActive(View view);
-
-  void setActive(View view);
-
+  /**
+   * Replaces the current layout by the given one.
+   */
   void setActiveLayout(DockingLayout layout);
 
-  ////
-
+  /**
+   * Creates the "Desktop" menu with the layout sub menu and one entry per dock.
+   */
   public JMenu createDesktopMenu(Map<String, Component> components, Properties settings,
       ActionListener listener);
 
-  RootWindow buildDesktop(Map<String, Component> components, File file);
+  /**
+   * Builds the desktop for the given components and loads the layouts from the file.
+   *
+   * @return the component containing all docks
+   */
+  JComponent buildDesktop(Map<String, Component> components, File file);
 
+  /**
+   * Returns all components managed by the desktop.
+   */
   Collection<Component> getComponentsUsed();
 
+  /**
+   * Sets the client settings.
+   */
   void setProperties(Properties settings);
 
+  /**
+   * Refreshes the list of layouts in the layout menu.
+   */
   void updateLayoutMenu();
 
-  StringViewMap getViewMap();
-
+  /**
+   * Writes all layouts to the given file.
+   */
   void write(File file) throws IOException;
 
-  void setVisible(RootWindow splitRoot, String viewName, boolean setVisible);
+  /**
+   * Opens or closes the dock with the given key.
+   */
+  void setVisible(String viewName, boolean setVisible);
 
+  /**
+   * Returns true if the dock with the given key is open.
+   */
+  boolean isVisible(String viewName);
+
+  /**
+   * Opens the dock with the given key (if necessary) and brings it to front.
+   */
+  void restoreView(String viewName);
+
+  /**
+   * Shows or hides the tab of docks that are alone in their area.
+   */
   void setTabVisibility(boolean b);
 
+  /**
+   * Deletes the active layout.
+   */
   void deleteCurrentLayout();
 
+  /**
+   * Adds the layouts from the given file.
+   */
   void addLayouts(File selectedFile);
 
+  /**
+   * Returns the layout with the given name or null.
+   */
   Object getLayout(String newLayoutName);
 
+  /**
+   * Creates a new layout with the default arrangement and activates it.
+   */
   void createNewLayout(String newLayoutName);
 
 }
