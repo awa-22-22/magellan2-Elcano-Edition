@@ -52,7 +52,6 @@ import magellan.library.GameData;
 import magellan.library.Unit;
 import magellan.library.UnitContainer;
 import magellan.library.utils.Resources;
-import net.infonode.tabbedpanel.titledtab.TitledTab;
 
 /**
  * This is a single panel representing ONE script.
@@ -72,7 +71,7 @@ public class ExtendedCommandsDocument extends JPanel implements ActionListener, 
   private JTextField findBox = null;
   private ExtendedCommands commands = null;
   private JLabel positionBox = null;
-  private TitledTab tab = null;
+  private ScriptTab tab = null;
   private JTextField gotoBox;
   private JButton gotoButton;
   private JButton findButton;
@@ -449,7 +448,7 @@ public class ExtendedCommandsDocument extends JPanel implements ActionListener, 
    *
    * @return Returns tab.
    */
-  public TitledTab getTab() {
+  public ScriptTab getTab() {
     return tab;
   }
 
@@ -458,7 +457,7 @@ public class ExtendedCommandsDocument extends JPanel implements ActionListener, 
    *
    * @param tab The value for tab.
    */
-  public void setTab(TitledTab tab) {
+  public void setTab(ScriptTab tab) {
     this.tab = tab;
   }
 
