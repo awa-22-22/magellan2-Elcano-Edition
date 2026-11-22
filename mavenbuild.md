@@ -1,8 +1,9 @@
 # Building Magellan EE with Maven
 
-The project is built with Maven. The build produces a single executable
-**fat jar** that contains all compiled classes, all libraries and the help, and
-a runnable distribution zip. All libraries come from Maven Central. (The former
+The project is built with Maven. The build produces an executable **Magellan
+jar** with the compiled classes, resources and the help, a `lib/` folder with
+the libraries (unchanged jars, referenced by the `Class-Path` of the jar's
+manifest), and a runnable distribution zip. All libraries come from Maven Central. (The former
 Ant build, `build.xml`, has been removed, see the end of this file.)
 
 ## Requirements
@@ -18,10 +19,11 @@ Ant build, `build.xml`, has been removed, see the end of this file.)
 mvn package
 ```
 
-This compiles all sources, runs the unit tests, and creates both
+This compiles all sources, runs the unit tests, and creates
 
 ```
-target/magellan-ee-1.0.0-SNAPSHOT.jar          # the fat jar alone
+target/magellan-ee-1.0.0-SNAPSHOT.jar          # the Magellan jar
+target/lib/*.jar                               # the libraries it references
 target/magellan-ee-1.0.0-SNAPSHOT-dist.zip     # a runnable distribution (see below)
 ```
 
@@ -34,8 +36,8 @@ mvn package -DskipTests
 ## Running
 
 Magellan reads its configuration and data files (`etc/`) from the
-working directory at runtime — only the classpath and the help (see below)
-are bundled into the jar.
+working directory at runtime — only the classes and the help (see below)
+are in the jar, and the libraries must be in `lib/` next to it.
 The jar alone is therefore **not standalone**: running
 `java -jar target/magellan-ee-1.0.0-SNAPSHOT.jar` only works if an `etc/` directory
 happens to be reachable from the current directory (e.g. the project root,
@@ -77,20 +79,28 @@ java -jar target/magellan-ee-1.0.0-SNAPSHOT.jar -d /path/to/magellan2
   `help/` into `target/classes/help` and runs the JavaHelp `Indexer` there for
   both languages, so the gitignored `JavaHelpSearch/` indexes are generated
   during the build and the source tree stays untouched.
-- **Fat jar**: `maven-shade-plugin` merges the jar of `maven-jar-plugin`
-  (classes, resources, help) with all compile and runtime dependencies into
-  one executable jar (`Main-Class: magellan.client.Client`), which replaces
-  the thin jar (kept as `target/original-*.jar`). On duplicate entries the
-  first dependency in the order of `pom.xml` wins; `META-INF/services` files
-  are merged. Signature files (`META-INF/*.SF`, `*.RSA`, `*.DSA`) and module
-  descriptors are excluded, because they would be invalid in a merged jar.
-  A new dependency needs no further configuration to end up in the jar.
-- **Distribution zip**: `maven-assembly-plugin` runs after the shade plugin
-  in the `package` phase (so it picks up the finished jar). It uses the
-  descriptor `src/assembly/dist.xml` to lay out a runnable copy: the fat jar,
+- **Magellan jar and lib/**: `maven-jar-plugin` builds the jar (classes,
+  resources, help) with `Main-Class: magellan.client.Client` and a
+  `Class-Path` listing every runtime dependency as `lib/<artifact>-<version>.jar`.
+  `maven-dependency-plugin` (`copy-dependencies`) copies exactly these jars to
+  `target/lib`. The libraries stay unchanged (signatures, licence and service
+  files, multi-release content), a library can be replaced by the user (e.g.
+  the LGPL JFreeChart), and a new dependency needs no further configuration.
+  Start Magellan with `java -jar` (as the start scripts do), not with `-cp`:
+  then only the Magellan jar is on `java.class.path`, and the plugin search
+  (`AbstractPlugInLoader`, which opens every `java.class.path` entry) does not
+  scan the libraries.
+- **Distribution zip**: `maven-assembly-plugin` runs after the
+  `copy-dependencies` execution in the `package` phase (so it picks up the
+  finished jar and `target/lib`). It uses the descriptor
+  `src/assembly/dist.xml` to lay out a runnable copy: the Magellan jar, `lib/`,
   the runtime data Magellan reads from the working directory
   (`etc/*.properties`, `etc/*.ini`, `etc/images`, `etc/rules`, `etc/plugins`),
-  the generated `etc/VERSION`, `doc/`, the top-level readme/license files, the
+  the generated `etc/VERSION`, `doc/`, the license and notice files of the
+  libraries (collected from their jars into `target/licenses` by the
+  `copy-lib-licenses` execution and placed in `doc/license/<library>-<version>/`;
+  `doc/license/` in the repository only holds the licenses of libraries whose
+  jar contains none), the top-level readme/license files, the
   Magellan 2 plugin compatibility jars, an empty `plugins/` folder for user
   plugins, and the start scripts `src/main/scripts/magellan.sh` / `.bat`.
   Not included: `etc/names` (used by the name generator, but not part of the
@@ -134,8 +144,9 @@ intentionally not migrated:
   `<changelist>` (see "Version").
 - **Four jars plus lib folder**: Ant shipped `magellan-library.jar`,
   `magellan-client.jar`, `magellan-plugins.jar` and `magellan-help.jar` with
-  `lib/*.jar`; Maven builds one jar. Splitting the project into Maven modules
-  would be needed to get that layout back.
+  `lib/*.jar`; Maven builds one Magellan jar plus `lib/`. Splitting the
+  project into Maven modules would be needed to get the separate Magellan
+  jars back.
 
 ## Notes
 

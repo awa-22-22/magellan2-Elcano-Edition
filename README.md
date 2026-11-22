@@ -20,17 +20,17 @@ Check out this repository, open a terminal in its root directory and run:
 
     mvn package
 
-This compiles the sources, runs the unit tests and packages everything into a single executable fat jar plus a runnable distribution zip. To skip the tests for a quick build:
+This compiles the sources, runs the unit tests and packages the Magellan jar, the libraries it needs (in `target/lib`) and a runnable distribution zip. To skip the tests for a quick build:
 
     mvn package -DskipTests
 
-See [mavenbuild.md](mavenbuild.md) for details on how the build works and what it produces (`target/magellan-ee-<version>.jar` and `target/magellan-ee-<version>-dist.zip`). All libraries come from Maven Central; the old Ant build of the original project has been removed.
+See [mavenbuild.md](mavenbuild.md) for details on how the build works and what it produces (`target/magellan-ee-<version>.jar`, `target/lib/` and `target/magellan-ee-<version>-dist.zip`). All libraries come from Maven Central; the old Ant build of the original project has been removed.
 
 The project can also be imported as a Maven project into an IDE (Eclipse, IntelliJ, VS Code). The main class is `magellan.client.Client`. Native installers (IzPack / Install4J), Javadoc and a source jar are not part of the Maven build.
 
 ## How To Run
 
-Magellan reads its configuration and data files from the working directory at runtime, so unpack the distribution zip and run the jar from inside it (or use the provided start script):
+Magellan reads its configuration and data files from the working directory at runtime, so unpack the distribution zip and run the jar from inside it (or use the provided start script). The libraries are in the `lib/` folder next to the jar, which finds them by itself:
 
     unzip target/magellan-ee-<version>-dist.zip -d /somewhere
     cd /somewhere/magellan-ee-<version>
@@ -70,6 +70,6 @@ Magellan EE is derived from Magellan 2 and is a modified version of it. All orig
 
 Unless otherwise indicated, all files in this distribution are provided to you under the terms and conditions of the GNU GPL License Version 2.0. A copy of this license is provided in COPYING.txt. Modifications made in Magellan EE are provided under the same license.
 
-Exceptions from the GNU GPL are notified in the source files itself or written down in a separate file (e.g. `src/release/lib/jflap.LICENSE.txt`).
+Exceptions from the GNU GPL are notified in the source files itself or written down in a separate file. The licences of the bundled libraries are in `doc/license/`.
 
 If you are not satisfied that EVERYTHING is under the GNU GPL License you should not use Magellan.

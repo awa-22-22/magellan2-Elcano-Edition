@@ -48,8 +48,8 @@
   <!--
     All libraries come from Maven Central (issue #2); local jars (system
     scope) are rejected by the maven-enforcer-plugin below. Every compile and
-    runtime dependency is bundled into the executable jar by the
-    maven-shade-plugin.
+    runtime dependency is copied unchanged into lib/ next to the Magellan jar,
+    whose manifest references them (Class-Path).
   -->
   <dependencyManagement>
     <dependencies>
@@ -169,7 +169,12 @@
       </resource>
     </resources>
     <plugins>
-      <!-- expose the resolved dependency jars as properties (javahelp indexer below) -->
+      <!--
+        Expose the resolved dependency jars as properties (javahelp indexer
+        below), copy all runtime dependencies to target/lib, where the
+        Class-Path of the Magellan jar expects them, and collect their license
+        files in target/licenses (both are taken into the distribution zip).
+      -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-dependency-plugin</artifactId>
@@ -181,6 +186,36 @@
             <goals>
               <goal>properties</goal>
             </goals>
+          </execution>
+          <execution>
+            <id>copy-libs</id>
+            <phase>package</phase>
+            <goals>
+              <goal>copy-dependencies</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${project.build.directory}/lib</outputDirectory>
+              <includeScope>runtime</includeScope>
+            </configuration>
+          </execution>
+          <execution>
+            <!-- license and notice files of the libraries, one folder per library,
+                 for doc/license/ of the distribution zip -->
+            <id>copy-lib-licenses</id>
+            <phase>package</phase>
+            <goals>
+              <goal>unpack-dependencies</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${project.build.directory}/licenses</outputDirectory>
+              <includeScope>runtime</includeScope>
+              <includes>META-INF/LICENSE*,META-INF/LICENCE*,META-INF/NOTICE*</includes>
+              <useSubDirectoryPerArtifact>true</useSubDirectoryPerArtifact>
+              <stripType>true</stripType>
+              <fileMappers>
+                <org.codehaus.plexus.components.io.filemappers.FlattenFileMapper />
+              </fileMappers>
+            </configuration>
           </execution>
         </executions>
       </plugin>
@@ -348,59 +383,37 @@
       </plugin>
 
       <!--
-        Build the executable fat jar: the jar of maven-jar-plugin (classes,
-        resources, JavaHelp with search index) plus all compile and runtime
-        dependencies. It replaces the thin jar. On duplicate entries the first
-        dependency in the order of this pom wins; service files are merged.
+        The Magellan jar: classes, resources and the JavaHelp set (with search
+        index). The libraries are not merged into it; the manifest references
+        them in lib/ (Class-Path), so "java -jar magellan-ee-<version>.jar"
+        works next to a lib/ folder (target/ or the distribution zip). Only
+        this jar is on java.class.path, so the plugin search does not scan the
+        libraries.
       -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-shade-plugin</artifactId>
-        <version>3.6.2</version>
-        <executions>
-          <execution>
-            <id>build-fat-jar</id>
-            <phase>package</phase>
-            <goals>
-              <goal>shade</goal>
-            </goals>
-            <configuration>
-              <createDependencyReducedPom>false</createDependencyReducedPom>
-              <filters>
-                <filter>
-                  <!-- signatures would be invalid in the merged jar; module
-                       descriptors do not apply to a merged jar -->
-                  <artifact>*:*</artifact>
-                  <excludes>
-                    <exclude>META-INF/*.SF</exclude>
-                    <exclude>META-INF/*.RSA</exclude>
-                    <exclude>META-INF/*.DSA</exclude>
-                    <exclude>module-info.class</exclude>
-                    <exclude>META-INF/versions/*/module-info.class</exclude>
-                  </excludes>
-                </filter>
-              </filters>
-              <transformers>
-                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                  <mainClass>magellan.client.Client</mainClass>
-                  <manifestEntries>
-                    <Specification-Title>Magellan Client ${project.version}</Specification-Title>
-                    <Specification-Vendor>Magellan Development Team</Specification-Vendor>
-                  </manifestEntries>
-                </transformer>
-                <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer" />
-              </transformers>
-            </configuration>
-          </execution>
-        </executions>
+        <artifactId>maven-jar-plugin</artifactId>
+        <version>3.5.1</version>
+        <configuration>
+          <archive>
+            <manifest>
+              <mainClass>magellan.client.Client</mainClass>
+              <addClasspath>true</addClasspath>
+              <classpathPrefix>lib/</classpathPrefix>
+            </manifest>
+            <manifestEntries>
+              <Specification-Title>Magellan Client ${project.version}</Specification-Title>
+              <Specification-Vendor>Magellan Development Team</Specification-Vendor>
+            </manifestEntries>
+          </archive>
+        </configuration>
       </plugin>
 
       <!--
-        Assemble the runnable distribution zip (fat jar + etc/ + doc/ +
-        start scripts), mirroring the Ant copy_release_data/zip_release
-        targets. Declared after the maven-shade-plugin so the fat jar already
-        exists when this runs (both are bound to the package phase; same-phase
-        executions run in declaration order).
+        Assemble the runnable distribution zip (Magellan jar + lib/ + etc/ +
+        doc/ + start scripts). Declared after the maven-dependency-plugin so target/lib
+        already exists when this runs (both are bound to the package phase;
+        same-phase executions run in declaration order).
       -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>

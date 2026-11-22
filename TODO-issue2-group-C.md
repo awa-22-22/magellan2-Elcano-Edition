@@ -13,7 +13,8 @@ All packages of this file are finished; the rest of the file is kept as history.
 - **C1** look & feel: old skins removed, FlatLaf 3.7.2 added (same branch).
 - **C2** skill chart: JFreeChart 1.5.6 from Maven Central (branch `Issue-#2-C2-jfreechart`).
 - **Cleanup** (branch `Issue-#2-cleanup`): langchain4j removed, Ant build (`build.xml`, `.classpath`,
-  `etc/manifest.mf.template`, `lib/`) removed, fat jar built by `maven-shade-plugin`,
+  `etc/manifest.mf.template`, `lib/`) removed, fat jar replaced by a Magellan jar with
+  `Class-Path` plus `lib/` (branch `Issue-#2-thin-jar`),
   `maven-enforcer-plugin` bans system scope, Dependabot configured, `mavenbuild.md`/`README.md`
   updated. The installers under `installer/` were kept on purpose.
 

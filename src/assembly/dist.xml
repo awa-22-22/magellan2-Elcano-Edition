@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  Assembles a runnable Magellan distribution zip: the fat jar (which also
-  contains the help) plus the runtime data files it reads from the working
+  Assembles a runnable Magellan distribution zip: the Magellan jar (which also
+  contains the help), the libraries in lib/ (referenced by the Class-Path of
+  the jar's manifest), the runtime data files it reads from the working
   directory (etc/*.properties, etc/*.ini, etc/images, etc/rules, etc/plugins),
   the top-level docs, and start scripts. Not included: etc/names (not part of
   the classic release layout either). See mavenbuild.md.
@@ -17,7 +18,7 @@
   <baseDirectory>magellan-ee-${project.version}</baseDirectory>
 
   <files>
-    <!-- the fat jar built by the maven-shade-plugin earlier in the package phase -->
+    <!-- the Magellan jar; its manifest references the libraries in lib/ -->
     <file>
       <source>${project.build.directory}/${project.build.finalName}.jar</source>
       <outputDirectory>/</outputDirectory>
@@ -38,6 +39,23 @@
   </files>
 
   <fileSets>
+    <!-- the libraries, copied to target/lib by maven-dependency-plugin -->
+    <fileSet>
+      <directory>${project.build.directory}/lib</directory>
+      <outputDirectory>lib</outputDirectory>
+      <includes>
+        <include>*.jar</include>
+      </includes>
+    </fileSet>
+    <!-- license and notice files of the libraries, collected from their jars -->
+    <fileSet>
+      <directory>${project.build.directory}/licenses</directory>
+      <outputDirectory>doc/license</outputDirectory>
+      <!-- files only, so libraries without license files leave no empty folder -->
+      <includes>
+        <include>*/*</include>
+      </includes>
+    </fileSet>
     <!-- top-level readme/license files -->
     <fileSet>
       <directory>${project.basedir}</directory>
