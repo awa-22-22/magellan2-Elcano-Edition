@@ -24,7 +24,7 @@ This compiles the sources, runs the unit tests and packages everything into a si
 
     mvn package -DskipTests
 
-See [mavenbuild.md](mavenbuild.md) for details on how the build works, what it produces (`target/magellan-ee-<version>.jar` and `target/magellan-ee-<version>-dist.zip`) and which parts of the old Ant build (`build.xml`) it replaces. The Ant build is a leftover of the original project; it is not maintained and may be removed.
+See [mavenbuild.md](mavenbuild.md) for details on how the build works and what it produces (`target/magellan-ee-<version>.jar` and `target/magellan-ee-<version>-dist.zip`). All libraries come from Maven Central; the old Ant build of the original project has been removed.
 
 The project can also be imported as a Maven project into an IDE (Eclipse, IntelliJ, VS Code). The main class is `magellan.client.Client`. Native installers (IzPack / Install4J), Javadoc and a source jar are not part of the Maven build.
 

@@ -5,6 +5,21 @@ https://github.com/awa-22-22/magellan2-Elcano-Edition/issues/2 ("Modernize the l
 labels Refactoring, internal). This file covers TODO step 3 of that issue: *replace the patched or
 unavailable libraries, splitting the hard ones into their own issues.*
 
+## Status (2026-11-22): done
+
+All packages of this file are finished; the rest of the file is kept as history.
+
+- **C3** docking: InfoNode replaced by Modern Docking 1.4.9 (branch `Issue-#2-New-Docks`).
+- **C1** look & feel: old skins removed, FlatLaf 3.7.2 added (same branch).
+- **C2** skill chart: JFreeChart 1.5.6 from Maven Central (branch `Issue-#2-C2-jfreechart`).
+- **Cleanup** (branch `Issue-#2-cleanup`): langchain4j removed, Ant build (`build.xml`, `.classpath`,
+  `etc/manifest.mf.template`, `lib/`) removed, fat jar built by `maven-shade-plugin`,
+  `maven-enforcer-plugin` bans system scope, Dependabot configured, `mavenbuild.md`/`README.md`
+  updated. The installers under `installer/` were kept on purpose.
+
+Still open: exercising the step-2 changes against a real server (order upload, email, version
+check, online help, `.bz2` reports) and updating the checklist of issue #2 on GitHub.
+
 ## State when this file was written
 
 Steps 1 and 2 are done (not yet committed, see `git status`):

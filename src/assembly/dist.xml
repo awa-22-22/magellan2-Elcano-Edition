@@ -1,13 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  Assembles a runnable Magellan distribution zip, mirroring the Ant
-  copy_release_data/zip_release targets: the fat jar plus the runtime data
-  files it reads from the working directory (etc/*.properties, etc/*.ini,
-  etc/images, etc/rules, etc/plugins), the top-level docs, and start scripts.
-
-  Not included yet (see mavenbuild.md "Not yet covered"): the JavaHelp
-  jar (help/, built by the separate build_help/index_help Ant targets) and
-  etc/names (not part of the classic release/ layout either).
+  Assembles a runnable Magellan distribution zip: the fat jar (which also
+  contains the help) plus the runtime data files it reads from the working
+  directory (etc/*.properties, etc/*.ini, etc/images, etc/rules, etc/plugins),
+  the top-level docs, and start scripts. Not included: etc/names (not part of
+  the classic release layout either). See mavenbuild.md.
 -->
 <assembly xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.3"
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -20,7 +17,7 @@
   <baseDirectory>magellan-ee-${project.version}</baseDirectory>
 
   <files>
-    <!-- the fat jar built by the antrun execution earlier in the package phase -->
+    <!-- the fat jar built by the maven-shade-plugin earlier in the package phase -->
     <file>
       <source>${project.build.directory}/${project.build.finalName}.jar</source>
       <outputDirectory>/</outputDirectory>
@@ -32,7 +29,7 @@
       <outputDirectory>etc</outputDirectory>
       <destName>VERSION</destName>
     </file>
-    <!-- external plugins folder marker, as created by copy_release_data -->
+    <!-- external plugins folder marker -->
     <file>
       <source>${project.basedir}/installer/plugins-readme.txt</source>
       <outputDirectory>plugins</outputDirectory>
@@ -41,7 +38,7 @@
   </files>
 
   <fileSets>
-    <!-- top-level readme/license files, same set as copy_release_data -->
+    <!-- top-level readme/license files -->
     <fileSet>
       <directory>${project.basedir}</directory>
       <outputDirectory>/</outputDirectory>
@@ -83,7 +80,7 @@
       <lineEnding>windows</lineEnding>
     </fileSet>
 
-    <!-- runtime data read from the working directory, as in copy_release_data -->
+    <!-- runtime data read from the working directory -->
     <fileSet>
       <directory>${project.basedir}/etc</directory>
       <outputDirectory>etc</outputDirectory>

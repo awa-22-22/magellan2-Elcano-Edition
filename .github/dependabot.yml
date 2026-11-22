@@ -1,0 +1,20 @@
+# Dependabot proposes updates as pull requests (issue #2: keep the libraries
+# up to date). Libraries and build plugins come from Maven Central (pom.xml),
+# the CI workflow uses GitHub Actions (.github/workflows).
+version: 2
+updates:
+  - package-ecosystem: "maven"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    # wait two weeks after a release before proposing it
+    cooldown:
+      default-days: 14
+    open-pull-requests-limit: 5
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    cooldown:
+      default-days: 14

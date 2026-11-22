@@ -46,9 +46,10 @@
   </properties>
 
   <!--
-    Libraries are taken from Maven Central wherever possible (issue #2). The
-    remaining jars in lib/ (system scope) are patched, abandoned or not
-    available on Maven Central and are still to be replaced.
+    All libraries come from Maven Central (issue #2); local jars (system
+    scope) are rejected by the maven-enforcer-plugin below. Every compile and
+    runtime dependency is bundled into the executable jar by the
+    maven-shade-plugin.
   -->
   <dependencyManagement>
     <dependencies>
@@ -87,7 +88,6 @@
       <version>1.5.6</version>
     </dependency>
 
-    <!-- libraries from Maven Central (see issue #2) -->
     <dependency>
       <groupId>commons-beanutils</groupId>
       <artifactId>commons-beanutils</artifactId>
@@ -154,18 +154,6 @@
       <version>1.3</version>
       <scope>test</scope>
     </dependency>
-  <!-- Source: https://mvnrepository.com/artifact/dev.langchain4j/langchain4j -->
-  <dependency>
-    <groupId>dev.langchain4j</groupId>
-    <artifactId>langchain4j</artifactId>
-    <version>1.20.0</version>
-    <scope>compile</scope>
-   </dependency>
-  <dependency>
-    <groupId>dev.langchain4j</groupId>
-    <artifactId>langchain4j-open-ai</artifactId>
-    <version>1.20.0</version>
-</dependency>
   </dependencies>
 
   <build>
@@ -181,7 +169,7 @@
       </resource>
     </resources>
     <plugins>
-      <!-- expose the resolved dependency jars as properties for the Ant tasks below -->
+      <!-- expose the resolved dependency jars as properties (javahelp indexer below) -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-dependency-plugin</artifactId>
@@ -193,6 +181,40 @@
             <goals>
               <goal>properties</goal>
             </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <!--
+        Build rules: no local jars (system scope) and the minimum Java and
+        Maven versions.
+      -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-enforcer-plugin</artifactId>
+        <version>3.7.0</version>
+        <executions>
+          <execution>
+            <id>enforce-build-rules</id>
+            <goals>
+              <goal>enforce</goal>
+            </goals>
+            <configuration>
+              <rules>
+                <requireJavaVersion>
+                  <version>[11,)</version>
+                </requireJavaVersion>
+                <requireMavenVersion>
+                  <version>[3.6.3,)</version>
+                </requireMavenVersion>
+                <bannedDependencies>
+                  <excludes>
+                    <exclude>*:*:*:*:system</exclude>
+                  </excludes>
+                  <message>Local jars (system scope) are not allowed, use Maven Central.</message>
+                </bannedDependencies>
+              </rules>
+            </configuration>
           </execution>
         </executions>
       </plugin>
@@ -252,12 +274,8 @@
       </plugin>
 
       <!--
-        Build the fat jar. The maven-shade-plugin cannot merge system-scoped
-        dependencies, so this uses an Ant jar task: the compiled classes plus
-        the unpacked contents of all lib jars are merged into one executable
-        jar (first occurrence of a duplicate entry wins). The merge order
-        follows the former Class-Path of etc/manifest.mf.template. It
-        replaces the thin jar produced by maven-jar-plugin.
+        Ant tasks before packaging: index the JavaHelp set (search database)
+        and generate etc/VERSION.
       -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -272,9 +290,10 @@
             </goals>
             <configuration>
               <target>
-                <!-- index a copy of help/ so the source tree stays clean -->
-                <delete dir="${project.build.directory}/help" />
-                <copy todir="${project.build.directory}/help">
+                <!-- index a copy of help/ in the classes directory, so the source
+                     tree stays clean and the help ends up in the jar -->
+                <delete dir="${project.build.outputDirectory}/help" />
+                <copy todir="${project.build.outputDirectory}/help">
                   <fileset dir="${project.basedir}/help"
                            excludes="META-INF/**,readme.txt,*/JavaHelpSearch/**" />
                 </copy>
@@ -282,16 +301,16 @@
                   <attribute name="lang" />
                   <sequential>
                     <fileset id="help.set.@{lang}"
-                             dir="${project.build.directory}/help/@{lang}"
+                             dir="${project.build.outputDirectory}/help/@{lang}"
                              casesensitive="yes">
                       <include name="**/*.html" />
                     </fileset>
                     <pathconvert refid="help.set.@{lang}" property="help.files.@{lang}"
                                  pathsep="' '">
-                      <map from="${project.build.directory}/help/@{lang}/" to="" />
+                      <map from="${project.build.outputDirectory}/help/@{lang}/" to="" />
                     </pathconvert>
                     <java classname="com.sun.java.help.search.Indexer"
-                          dir="${project.build.directory}/help/@{lang}"
+                          dir="${project.build.outputDirectory}/help/@{lang}"
                           fork="true" failonerror="true" maxmemory="512m">
                       <arg line="'${help.files.@{lang}}'" />
                       <classpath>
@@ -325,57 +344,52 @@
               </target>
             </configuration>
           </execution>
+        </executions>
+      </plugin>
+
+      <!--
+        Build the executable fat jar: the jar of maven-jar-plugin (classes,
+        resources, JavaHelp with search index) plus all compile and runtime
+        dependencies. It replaces the thin jar. On duplicate entries the first
+        dependency in the order of this pom wins; service files are merged.
+      -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-shade-plugin</artifactId>
+        <version>3.6.2</version>
+        <executions>
           <execution>
             <id>build-fat-jar</id>
             <phase>package</phase>
             <goals>
-              <goal>run</goal>
+              <goal>shade</goal>
             </goals>
             <configuration>
-              <target>
-                <jar destfile="${project.build.directory}/${project.build.finalName}.jar"
-                     duplicate="preserve">
-                  <fileset dir="${project.build.outputDirectory}" />
-                  <!--
-                    The jars are merged in the classpath order of
-                    etc/manifest.mf.template (the order used by the classic Ant
-                    release); the first occurrence of a duplicate entry wins.
-                    All entries are zipfilesets because Ant processes
-                    zipgroupfilesets after zipfilesets regardless of document
-                    order, which would break the intended precedence.
-                  -->
-                  <!-- signature files of signed jars are excluded (they would be
-                       invalid in the merged jar) -->
-                  <zipfileset src="${com.sun.activation:jakarta.activation:jar}" excludes="META-INF/*.SF META-INF/*.RSA META-INF/*.DSA" />
-                  <zipfileset src="${commons-beanutils:commons-beanutils:jar}" excludes="META-INF/*.SF META-INF/*.RSA META-INF/*.DSA" />
-                  <zipfileset src="${commons-collections:commons-collections:jar}" excludes="META-INF/*.SF META-INF/*.RSA META-INF/*.DSA" />
-                  <zipfileset src="${org.apache.commons:commons-compress:jar}" excludes="META-INF/*.SF META-INF/*.RSA META-INF/*.DSA" />
-                  <zipfileset src="${commons-io:commons-io:jar}" excludes="META-INF/*.SF META-INF/*.RSA META-INF/*.DSA" />
-                  <zipfileset src="${org.apache.commons:commons-lang3:jar}" excludes="META-INF/*.SF META-INF/*.RSA META-INF/*.DSA" />
-                  <zipfileset src="${commons-codec:commons-codec:jar}" excludes="META-INF/*.SF META-INF/*.RSA META-INF/*.DSA" />
-                  <zipfileset src="${org.apache.commons:commons-email:jar}" excludes="META-INF/*.SF META-INF/*.RSA META-INF/*.DSA" />
-                  <zipfileset src="${commons-logging:commons-logging:jar}" excludes="META-INF/*.SF META-INF/*.RSA META-INF/*.DSA" />
-                  <zipfileset src="${io.github.andrewauclair:modern-docking-api:jar}" excludes="META-INF/*.SF META-INF/*.RSA META-INF/*.DSA module-info.class" />
-                  <zipfileset src="${io.github.andrewauclair:modern-docking-single-app:jar}" excludes="META-INF/*.SF META-INF/*.RSA META-INF/*.DSA module-info.class" />
-                  <zipfileset src="${com.formdev:flatlaf:jar}" excludes="META-INF/*.SF META-INF/*.RSA META-INF/*.DSA module-info.class META-INF/versions/*/module-info.class" />
-                  <zipfileset src="${com.fasterxml.jackson.core:jackson-annotations:jar}" excludes="META-INF/*.SF META-INF/*.RSA META-INF/*.DSA" />
-                  <zipfileset src="${com.fasterxml.jackson.core:jackson-core:jar}" excludes="META-INF/*.SF META-INF/*.RSA META-INF/*.DSA" />
-                  <zipfileset src="${com.fasterxml.jackson.core:jackson-databind:jar}" excludes="META-INF/*.SF META-INF/*.RSA META-INF/*.DSA" />
-                  <zipfileset src="${javax.help:javahelp:jar}" excludes="META-INF/*.SF META-INF/*.RSA META-INF/*.DSA" />
-                  <zipfileset src="${com.sun.mail:jakarta.mail:jar}" excludes="META-INF/*.SF META-INF/*.RSA META-INF/*.DSA" />
-                  <zipfileset src="${io.github.parubok:multiline-label:jar}" excludes="META-INF/*.SF META-INF/*.RSA META-INF/*.DSA" />
-                  <zipfileset src="${org.jfree:jfreechart:jar}" excludes="META-INF/*.SF META-INF/*.RSA META-INF/*.DSA module-info.class META-INF/versions/*/module-info.class" />
-                  <!-- JavaHelp set incl. search index, found by Help.java via the classloader -->
-                  <zipfileset dir="${project.build.directory}/help" prefix="help" />
-                  <manifest>
-                    <attribute name="Main-Class" value="magellan.client.Client" />
-                    <attribute name="Specification-Title"
-                               value="Magellan Client ${project.version}" />
-                    <attribute name="Specification-Vendor"
-                               value="Magellan Development Team" />
-                  </manifest>
-                </jar>
-              </target>
+              <createDependencyReducedPom>false</createDependencyReducedPom>
+              <filters>
+                <filter>
+                  <!-- signatures would be invalid in the merged jar; module
+                       descriptors do not apply to a merged jar -->
+                  <artifact>*:*</artifact>
+                  <excludes>
+                    <exclude>META-INF/*.SF</exclude>
+                    <exclude>META-INF/*.RSA</exclude>
+                    <exclude>META-INF/*.DSA</exclude>
+                    <exclude>module-info.class</exclude>
+                    <exclude>META-INF/versions/*/module-info.class</exclude>
+                  </excludes>
+                </filter>
+              </filters>
+              <transformers>
+                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                  <mainClass>magellan.client.Client</mainClass>
+                  <manifestEntries>
+                    <Specification-Title>Magellan Client ${project.version}</Specification-Title>
+                    <Specification-Vendor>Magellan Development Team</Specification-Vendor>
+                  </manifestEntries>
+                </transformer>
+                <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer" />
+              </transformers>
             </configuration>
           </execution>
         </executions>
@@ -384,9 +398,9 @@
       <!--
         Assemble the runnable distribution zip (fat jar + etc/ + doc/ +
         start scripts), mirroring the Ant copy_release_data/zip_release
-        targets. Declared after the antrun execution above so the fat jar
-        already exists when this runs (both are bound to the package phase;
-        same-phase executions run in declaration order).
+        targets. Declared after the maven-shade-plugin so the fat jar already
+        exists when this runs (both are bound to the package phase; same-phase
+        executions run in declaration order).
       -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
