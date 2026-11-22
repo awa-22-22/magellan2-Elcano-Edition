@@ -14,6 +14,7 @@
 package magellan.client.skillchart;
 
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GradientPaint;
 import java.awt.GridBagConstraints;
@@ -32,12 +33,17 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 
-import com.jrefinery.chart.AxisNotCompatibleException;
-import com.jrefinery.chart.DefaultCategoryDataSource;
-import com.jrefinery.chart.HorizontalCategoryAxis;
-import com.jrefinery.chart.JFreeChart;
-import com.jrefinery.chart.Plot;
-import com.jrefinery.chart.VerticalNumberAxis;
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartPanel;
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.axis.NumberAxis;
+import org.jfree.chart.plot.CategoryPlot;
+import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.chart.renderer.category.BarRenderer;
+import org.jfree.chart.renderer.category.StandardBarPainter;
+import org.jfree.chart.ui.RectangleInsets;
+import org.jfree.data.category.CategoryDataset;
+import org.jfree.data.category.DefaultCategoryDataset;
 
 import magellan.client.event.EventDispatcher;
 import magellan.client.event.SelectionEvent;
@@ -62,7 +68,10 @@ import magellan.library.utils.logging.Logger;
  */
 public class SkillChartPanel extends InternationalizedDataPanel implements SelectionListener {
   private static final Logger log = Logger.getInstance(SkillChartPanel.class);
-  private SkillChartJFreeChartPanel chartPanel;
+  /** the key of the only data series of the chart */
+  private static final String SERIES = "persons";
+  private ChartPanel chartPanel;
+  private JFreeChart chart;
   private JComboBox persons;
   private JComboBox totalSkillPoints;
   private JComboBox totalSkillLevel;
@@ -83,32 +92,30 @@ public class SkillChartPanel extends InternationalizedDataPanel implements Selec
 
     ed.addSelectionListener(this);
 
-    // create axis, plot, chart
-    HorizontalCategoryAxis xAxis =
-        new HorizontalCategoryAxis(Resources
-            .get("skillchart.skillchartpanel.labeltext.horizontalaxis"));
-    VerticalNumberAxis yAxis =
-        new VerticalNumberAxis(Resources.get("skillchart.skillchartpanel.labeltext.verticalaxis"));
-    yAxis.setTickValue(1);
-    yAxis.setAutoRangeIncludesZero(true);
+    // create the chart: a vertical bar chart of the number of persons per skill level
+    chart =
+        ChartFactory.createBarChart("", Resources
+            .get("skillchart.skillchartpanel.labeltext.horizontalaxis"), Resources
+                .get("skillchart.skillchartpanel.labeltext.verticalaxis"), createDataset(null),
+            PlotOrientation.VERTICAL, false, true, false);
+    chart.getTitle().setFont(new Font("Arial", Font.BOLD, 24));
+    chart.setBackgroundPaint(new GradientPaint(0, 0, Color.white, 0, 1000, Color.blue));
 
-    try {
-      Plot verticalBarPlot = new VerticalBarPlot(null, xAxis, yAxis);
-      DefaultCategoryDataSource dataSource = createDataSource(null);
-      chartPanel =
-          new SkillChartJFreeChartPanel(new JFreeChart("", new Font("Arial", Font.BOLD, 24),
-              dataSource, verticalBarPlot), this);
-    } catch (AxisNotCompatibleException e) { // work on this later...
-      SkillChartPanel.log.warn(e);
-    }
+    CategoryPlot plot = chart.getCategoryPlot();
+    plot.setInsets(new RectangleInsets(10, 20, 20, 40));
+    NumberAxis valueAxis = (NumberAxis) plot.getRangeAxis();
+    valueAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
+    valueAxis.setAutoRangeIncludesZero(true);
 
-    JFreeChart chart = chartPanel.getChart();
-    chart.setLegend(null);
-    chart.setChartBackgroundPaint(new GradientPaint(0, 0, Color.white, 0, 1000, Color.blue));
+    BarRenderer renderer = (BarRenderer) plot.getRenderer();
+    renderer.setBarPainter(new StandardBarPainter());
+    renderer.setShadowVisible(false);
+    renderer.setDrawBarOutline(true);
+    renderer.setDefaultToolTipGenerator(
+        (CategoryDataset dataset, int row, int column) -> getToolTip(dataset.getColumnKey(column)));
 
-    // chart.setChartBackgroundPaint(new GradientPaint(0, 0, Color.white, 0, 500, new Color(153,
-    // 153, 204)));
-    chart.getPlot().setInsets(new Insets(10, 20, 20, 40));
+    chartPanel = new ChartPanel(chart);
+    chartPanel.setPreferredSize(new Dimension(480, 320));
 
     // initialize the Panel with all the stuff
     GridBagLayout grid = new GridBagLayout();
@@ -170,17 +177,20 @@ public class SkillChartPanel extends InternationalizedDataPanel implements Selec
     add(cumulative, c);
   }
 
+  /**
+   * Returns the chart (for tests).
+   */
+  JFreeChart getChart() {
+    return chart;
+  }
+
   protected void setSkillType() {
     SkillType skillType = (SkillType) skills.getSelectedItem();
 
-    if (skillType != null) {
-      chartPanel.getChart().setTitle(skillType.getName());
-    } else {
-      chartPanel.getChart().setTitle("");
-    }
+    chart.getTitle().setText(skillType != null ? skillType.getName() : "");
 
     setComboBoxes(skillType);
-    chartPanel.getChart().setDataSource(createDataSource(skillType));
+    chart.getCategoryPlot().setDataset(createDataset(skillType));
   }
 
   /**
@@ -239,51 +249,46 @@ public class SkillChartPanel extends InternationalizedDataPanel implements Selec
   }
 
   /**
-   * creates a DefaultCategoryDataSource as basis of a skillchart out of the SkillStats-Object of this
-   * class and the specified skillType. If skillType is null, an empty datasource is created,
-   * containing the single value (0,0)
+   * Creates the data set of the chart out of the SkillStats-Object of this class and the specified
+   * skillType: the number of persons for every skill level from one below the lowest to one above
+   * the highest known level. If skillType is null, the data set contains the single value (0,0).
    */
-  private DefaultCategoryDataSource createDataSource(SkillType skillType) {
-    Number dataArray[][];
-    Vector<Object> names;
+  private DefaultCategoryDataset createDataset(SkillType skillType) {
+    DefaultCategoryDataset dataset = new DefaultCategoryDataset();
 
     if (skillType == null) {
-      dataArray = new Number[][] { { Integer.valueOf(0) } };
-      names = new Vector<Object>();
-      names.add("");
-    } else {
-      int lowLevel = skillStats.getLowestKnownSkillLevel(skillType);
-      int highLevel = skillStats.getHighestKnownSkillLevel(skillType);
-
-      if (highLevel != 0) {
-        highLevel++;
-      }
-
-      if (lowLevel != 0) {
-        lowLevel--;
-      }
-
-      dataArray = new Number[1][highLevel - lowLevel + 1];
-      names = new Vector<Object>();
-
-      int loopCounter = 0;
-      int cumulativeLevel = 0;
-
-      for (int level = lowLevel; level <= highLevel; loopCounter++, level++) {
-        names.add(Integer.valueOf(level));
-      }
-      for (int level = highLevel; level >= lowLevel; loopCounter++, level--) {
-        Skill skill = new Skill(skillType, 1, level, 1, false);
-        int skillLevel = skillStats.getPersonNumber(skill);
-        if (cumulative.isSelected()) {
-          cumulativeLevel += skillLevel;
-          skillLevel = cumulativeLevel;
-        }
-        dataArray[0][level - lowLevel] = Integer.valueOf(skillLevel);
-      }
+      dataset.addValue(0, SERIES, "");
+      return dataset;
     }
 
-    return new DefaultCategoryDataSource(new Vector<Object>(), names, dataArray);
+    int lowLevel = skillStats.getLowestKnownSkillLevel(skillType);
+    int highLevel = skillStats.getHighestKnownSkillLevel(skillType);
+
+    if (highLevel != 0) {
+      highLevel++;
+    }
+
+    if (lowLevel != 0) {
+      lowLevel--;
+    }
+
+    // cumulative values are summed up from the highest level downwards
+    int[] values = new int[highLevel - lowLevel + 1];
+    int cumulativeLevel = 0;
+    for (int level = highLevel; level >= lowLevel; level--) {
+      int persons = skillStats.getPersonNumber(new Skill(skillType, 1, level, 1, false));
+      if (cumulative.isSelected()) {
+        cumulativeLevel += persons;
+        persons = cumulativeLevel;
+      }
+      values[level - lowLevel] = persons;
+    }
+
+    for (int level = lowLevel; level <= highLevel; level++) {
+      dataset.addValue(values[level - lowLevel], SERIES, Integer.valueOf(level));
+    }
+
+    return dataset;
   }
 
   /**
@@ -355,7 +360,7 @@ public class SkillChartPanel extends InternationalizedDataPanel implements Selec
           skills.setSelectedIndex(0);
         }
 
-        chartPanel.getChart().setDataSource(createDataSource((SkillType) skills.getSelectedItem()));
+        chart.getCategoryPlot().setDataset(createDataset((SkillType) skills.getSelectedItem()));
       }
     }
   }
@@ -383,26 +388,21 @@ public class SkillChartPanel extends InternationalizedDataPanel implements Selec
   }
 
   /**
-   * returns a tooltip for the (i)th Bar of the chart
+   * Returns the tooltip for the bar of the given skill level (column key of the data set). The
+   * values are not cumulative.
    */
-  public String getToolTip(int i) {
+  private String getToolTip(Comparable<?> levelKey) {
     SkillType type = (SkillType) skills.getSelectedItem();
 
-    if ((type == null) || (i >= skillStats.getKnownSkills(type).size()))
+    if ((type == null) || !(levelKey instanceof Integer))
       return null;
-    else {
-      Skill skill = skillStats.getKnownSkills(type).get(i);
-      String retVal =
-          Resources.get("skillchart.skillchartpanel.labeltext.totalpersons")
-              + skillStats.getPersonNumber(skill);
-      retVal +=
-          (", " + Resources.get("skillchart.skillchartpanel.labeltext.totalskilllevel") + skillStats
-              .getSkillLevelNumber(skill));
-      retVal +=
-          (", " + Resources.get("skillchart.skillchartpanel.labeltext.totalskillpoints") + skillStats
-              .getSkillPointsNumber(skill));
 
-      return retVal;
-    }
+    Skill skill = new Skill(type, 1, ((Integer) levelKey).intValue(), 1, false);
+    return Resources.get("skillchart.skillchartpanel.labeltext.totalpersons")
+        + skillStats.getPersonNumber(skill)
+        + ", " + Resources.get("skillchart.skillchartpanel.labeltext.totalskilllevel")
+        + skillStats.getSkillLevelNumber(skill)
+        + ", " + Resources.get("skillchart.skillchartpanel.labeltext.totalskillpoints")
+        + skillStats.getSkillPointsNumber(skill);
   }
 }

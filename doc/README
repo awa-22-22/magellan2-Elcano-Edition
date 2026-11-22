@@ -17,7 +17,7 @@ commons-codec-1.14.jar	1.14		Apache			http://commons.apache.org/codec/		Version 
 commons-logging-1.2.jar	1.2			Apache			http://commons.apache.org/logging/		Version check?
 modern-docking			1.4.9		MIT				https://github.com/andrewauclair/ModernDocking	Docking Framework
 flatlaf					3.7.2		Apache 2.0		https://www.formdev.com/flatlaf/		Look and Feel
-jfreechart				0.5.6		(reduced) LGPL	http://jfreechart.sourceforge.net		Skillchart
+jfreechart				1.5.6		LGPL			https://www.jfree.org/jfreechart/		Skillchart
 javahelp.jar			2.0.05		Extended Sun Binary Code License	https://mvnrepository.com/artifact/javax.help/javahelp			Help
 -jaxp-api.jar			?? TODO		AFS 1.1/W3C Software License	?? TODO						Look&Feel
 -RadixTree_0.1.jar		0.1			Berkeley		http://code.google.com/p/radixtree/	        OrderParser
