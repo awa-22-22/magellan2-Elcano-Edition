@@ -69,7 +69,7 @@ public class RendererLoaderTest {
   /**
    * A class file that cannot be linked (here: garbage bytes) must be skipped, not crash the
    * client. Regression test for the IncompatibleClassChangeError caused by
-   * com.jgoodies.looks.windows.WindowsMenuItemRenderer of skinsCollected.jar, which is
+   * com.jgoodies.looks.windows.WindowsMenuItemRenderer of the former skinsCollected.jar, which was
    * incompatible with the looks-1.3b1 classes.
    */
   @Test

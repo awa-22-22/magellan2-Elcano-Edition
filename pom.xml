@@ -75,47 +75,18 @@
       <version>1.4.9</version>
     </dependency>
     <dependency>
+      <!-- modern look and feel (FlatLaf Light/Dark/IntelliJ/Darcula/macOS), see etc/plaf.ini -->
+      <groupId>com.formdev</groupId>
+      <artifactId>flatlaf</artifactId>
+      <version>3.7.2</version>
+    </dependency>
+    <dependency>
       <!-- old com.jrefinery.chart API (JFreeChart 0.9.x), used by the skill chart -->
       <groupId>magellan.local</groupId>
       <artifactId>jfreechart</artifactId>
       <version>1.0</version>
       <scope>system</scope>
       <systemPath>${project.basedir}/lib/jfreechart.jar</systemPath>
-    </dependency>
-    <dependency>
-      <groupId>magellan.local</groupId>
-      <artifactId>kunststoff</artifactId>
-      <version>2.0.2</version>
-      <scope>system</scope>
-      <systemPath>${project.basedir}/lib/skins/kunststoff-2_0_2.jar</systemPath>
-    </dependency>
-    <dependency>
-      <groupId>magellan.local</groupId>
-      <artifactId>liquidlnf</artifactId>
-      <version>2.9.1</version>
-      <scope>system</scope>
-      <systemPath>${project.basedir}/lib/skins/liquidlnf-2.9.1.jar</systemPath>
-    </dependency>
-    <dependency>
-      <groupId>magellan.local</groupId>
-      <artifactId>looks</artifactId>
-      <version>1.3b1</version>
-      <scope>system</scope>
-      <systemPath>${project.basedir}/lib/skins/looks-1.3b1.jar</systemPath>
-    </dependency>
-    <dependency>
-      <groupId>magellan.local</groupId>
-      <artifactId>skinsCollected</artifactId>
-      <version>1.0</version>
-      <scope>system</scope>
-      <systemPath>${project.basedir}/lib/skins/skinsCollected.jar</systemPath>
-    </dependency>
-    <dependency>
-      <groupId>magellan.local</groupId>
-      <artifactId>xplookandfeel</artifactId>
-      <version>1.0</version>
-      <scope>system</scope>
-      <systemPath>${project.basedir}/lib/skins/xplookandfeel.jar</systemPath>
     </dependency>
 
     <!-- libraries from Maven Central (see issue #2) -->
@@ -388,6 +359,7 @@
                   <zipfileset src="${commons-logging:commons-logging:jar}" excludes="META-INF/*.SF META-INF/*.RSA META-INF/*.DSA" />
                   <zipfileset src="${io.github.andrewauclair:modern-docking-api:jar}" excludes="META-INF/*.SF META-INF/*.RSA META-INF/*.DSA module-info.class" />
                   <zipfileset src="${io.github.andrewauclair:modern-docking-single-app:jar}" excludes="META-INF/*.SF META-INF/*.RSA META-INF/*.DSA module-info.class" />
+                  <zipfileset src="${com.formdev:flatlaf:jar}" excludes="META-INF/*.SF META-INF/*.RSA META-INF/*.DSA module-info.class META-INF/versions/*/module-info.class" />
                   <zipfileset src="${com.fasterxml.jackson.core:jackson-annotations:jar}" excludes="META-INF/*.SF META-INF/*.RSA META-INF/*.DSA" />
                   <zipfileset src="${com.fasterxml.jackson.core:jackson-core:jar}" excludes="META-INF/*.SF META-INF/*.RSA META-INF/*.DSA" />
                   <zipfileset src="${com.fasterxml.jackson.core:jackson-databind:jar}" excludes="META-INF/*.SF META-INF/*.RSA META-INF/*.DSA" />
@@ -395,17 +367,6 @@
                   <zipfileset src="${com.sun.mail:jakarta.mail:jar}" excludes="META-INF/*.SF META-INF/*.RSA META-INF/*.DSA" />
                   <zipfileset src="${io.github.parubok:multiline-label:jar}" excludes="META-INF/*.SF META-INF/*.RSA META-INF/*.DSA" />
                   <zipfileset src="${project.basedir}/lib/jfreechart.jar" />
-                  <zipfileset src="${project.basedir}/lib/skins/kunststoff-2_0_2.jar" />
-                  <zipfileset src="${project.basedir}/lib/skins/liquidlnf-2.9.1.jar" />
-                  <zipfileset src="${project.basedir}/lib/skins/looks-1.3b1.jar" />
-                  <!-- skinsCollected bundles a newer JGoodies Looks (2.x) whose
-                       WindowsMenuItemRenderer cannot extend the final
-                       MenuItemRenderer of the winning looks-1.3b1 classes; the
-                       class is unusable in this classpath layout, so exclude it
-                       (the RendererLoader would otherwise try to load it) -->
-                  <zipfileset src="${project.basedir}/lib/skins/skinsCollected.jar"
-                              excludes="com/jgoodies/looks/windows/WindowsMenuItemRenderer*.class" />
-                  <zipfileset src="${project.basedir}/lib/skins/xplookandfeel.jar" />
                   <!-- JavaHelp set incl. search index, found by Help.java via the classloader -->
                   <zipfileset dir="${project.build.directory}/help" prefix="help" />
                   <manifest>

@@ -240,7 +240,7 @@ public class Client extends JFrame implements ShortcutListener, PreferencesFacto
 
   public static final String DEFAULT_LAF = "Nimbus";
 
-  public static final String[] FALLBACK_LAF = { "Metal", "Windows" };
+  public static final String[] FALLBACK_LAF = { DEFAULT_LAF, "Metal", "Windows" };
 
   /** This is the instance of this class */
   public static Client INSTANCE;
@@ -794,7 +794,11 @@ public class Client extends JFrame implements ShortcutListener, PreferencesFacto
               }
             } else {
               sizes.put(font, n + 1);
-              font = derivatives.get(font);
+              // no derivative if the font is not scaled (fScale == 1); null would remove the font
+              Font scaledFont = derivatives.get(font);
+              if (scaledFont != null) {
+                font = scaledFont;
+              }
             }
             UIManager.put(key, font);
             lTable.put(key, font);
