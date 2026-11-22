@@ -1,7 +1,13 @@
-name: "Run tests and build a test version with Maven on the elcano branch"
+name: "Run tests and build a test version with Maven"
 
 on:
+  # pushes to elcano build a test version
   push:
+    branches:
+    - "elcano"
+  # pull requests into elcano (e.g. from Dependabot) are built and tested
+  # before they are merged
+  pull_request:
     branches:
     - "elcano"
 

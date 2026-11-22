@@ -70,7 +70,12 @@ java -jar target/magellan-ee-1.0.0-SNAPSHOT.jar -d /path/to/magellan2
 - **Dependencies**: all libraries are regular dependencies from Maven Central
   (issue #2). Local jars are not allowed: `maven-enforcer-plugin` rejects
   `system`-scoped dependencies and also checks the minimum Java (11) and Maven
-  (3.6.3) versions. Dependabot (`.github/dependabot.yml`) proposes updates.
+  (3.6.3) versions. `duplicate-finder-maven-plugin` (bound to `package`) fails
+  the build if a class or resource exists twice, in two libraries or in a
+  library and the Magellan classes (with the `Class-Path` layout the JVM would
+  silently take the first one). Dependabot (`.github/dependabot.yml`) proposes
+  updates as pull requests; the CI workflow builds and tests every pull
+  request into `elcano`, so a broken update shows up before it is merged.
 - **Tests**: JUnit 4.13 and Hamcrest 1.3. `E3CommandParserTest` is excluded,
   and the tests run with `-Djava.awt.headless=true`.
 - **Help**: the JavaHelp sets (`help/de`, `help/en`) are bundled inside the
