@@ -410,6 +410,33 @@
       </plugin>
 
       <!--
+        No class or resource may exist twice: in two library jars, or in a
+        library and the Magellan classes. With the Class-Path layout the JVM
+        would silently take the first one. A typical cause is a dependency
+        update that pulls in the same packages under new Maven coordinates
+        (e.g. javax.activation under com.sun.activation and jakarta.activation).
+        Checks the compile, runtime and test classpaths; license and notice
+        files are ignored.
+      -->
+      <plugin>
+        <groupId>org.basepom.maven</groupId>
+        <artifactId>duplicate-finder-maven-plugin</artifactId>
+        <version>2.0.1</version>
+        <executions>
+          <execution>
+            <id>check-duplicate-classes</id>
+            <phase>package</phase>
+            <goals>
+              <goal>check</goal>
+            </goals>
+            <configuration>
+              <failBuildInCaseOfConflict>true</failBuildInCaseOfConflict>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <!--
         Assemble the runnable distribution zip (Magellan jar + lib/ + etc/ +
         doc/ + start scripts). Declared after the maven-dependency-plugin so target/lib
         already exists when this runs (both are bound to the package phase;
