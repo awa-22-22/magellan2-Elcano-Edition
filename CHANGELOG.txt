@@ -1,3 +1,20 @@
+2026-11-22 / Magellan Elcano Edition 1.0.0 (not yet released) - awa-22-22 (alexanderwanner@web.de)
+    * Magellan Elcano Edition (EE) introduced, derived from Magellan 2
+    * own settings directory (Magellan-EE), so EE and Magellan 2 can be used side by side
+    * auto-update removed; the version is taken from the Maven build
+    * marker jars magellan-client.jar / magellan-library.jar, so installers of Magellan 2 plugins accept the EE directory
+    * new docking framework (Modern Docking instead of the abandoned InfoNode); saved and exported layouts keep their format
+    * docks no longer offer the right-click options tab orientation/direction, split ratio, flip and mirror, and the top window bar (a saved one is moved to the left)
+    * extended commands dock uses standard tabs with a close button
+    * FlatLaf look and feels (Light, Dark, IntelliJ, Darcula, macOS Light/Dark) added
+    * old look and feels removed (Kunststoff, Liquid, Plastic/JGoodies, Windows XP, PGS); a removed one falls back to Nimbus
+    * skill chart of the faction statistics rebuilt on JFreeChart 1.5; tooltips are calculated per skill level
+    * fixed missing fonts (empty labels, NullPointerExceptions in the preferences dialog) when switching the look and feel with font scale 1.0
+    * server upload uses the Java HTTP client (java.net.http), .bz2 reports use commons-compress
+    * build: Maven instead of Ant; all libraries from Maven Central (issue #2); the build checks for local jars and duplicate classes
+    * build: the distribution zip contains the Magellan jar and the libraries in lib/, with their license files in doc/license/
+    * build: Dependabot proposes library updates; the GitHub workflow builds and tests pushes and pull requests to elcano
+
 2025-14-11 / Build 798 - awa-22-22 (alexanderwanner@web.de)
 	* fixed persistence of wahrerTyp - race id instead of race name - in CR files writer
 
